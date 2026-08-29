@@ -51,6 +51,18 @@ Mientras la variable esté vacía, todos los CTA quedan en estado *Disabled* con
 el texto "Contacto no disponible" y el FAB de WhatsApp no se renderiza. **Es el
 comportamiento esperado, no un bug** — evita exponer un enlace roto.
 
+### `PUBLIC_SITE_URL`
+
+URL pública del deploy. Astro la necesita para generar `og:url`, la URL
+canónica y `og:image` como absolutos. Sin ella, esos meta tags se omiten en
+lugar de publicarse apuntando a `localhost`. Agrégala a `.env.example` y al
+entorno del hosting:
+
+```
+# Ejemplo: https://printflow-landing.pages.dev
+PUBLIC_SITE_URL=
+```
+
 ## Sistema de diseño
 
 `src/styles/tokens.css` tiene **dos capas** y es el único lugar del proyecto

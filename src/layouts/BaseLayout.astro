@@ -13,7 +13,13 @@ interface Props {
 }
 
 const { title, description, ogImage } = Astro.props;
-const canonical = Astro.url.href;
+
+/**
+ * Astro.site sale de PUBLIC_SITE_URL (ver astro.config.mjs). Si no esta
+ * definida, Astro.url apunta a localhost durante el build; se omite la URL
+ * canonica antes que publicar una que apunte a la maquina de desarrollo.
+ */
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 ---
 
 <!doctype html>
@@ -39,10 +45,11 @@ const canonical = Astro.url.href;
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:locale" content="es_MX" />
     <meta property="og:site_name" content="Imprenta Escalante" />
-    {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.url).href} />}
+    {ogImage && Astro.site && <meta property="og:image" content={new URL(ogImage, Astro.site).href} />}
     {ogImage && <meta property="og:image:width" content="1200" />}
     {ogImage && <meta property="og:image:height" content="630" />}
     <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
