@@ -1,0 +1,44 @@
+---
+/**
+ * Seccion de confianza (spec §8.5): politica de anticipos + proceso de 3
+ * pasos + CTA final. Prohibido agregar sellos, testimonios, logos de
+ * clientes o certificaciones — no existen en las fuentes.
+ */
+import ProcessSteps from './ProcessSteps.astro';
+import Button from './ui/Button.astro';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+const href = buildWhatsappHref('Cotización general', 'general', 'trust');
+---
+
+<section
+  data-testid="trust"
+  class="mx-auto max-w-container px-space-2 py-space-6 md:px-space-6 md:py-space-8"
+>
+  <h2 class="text-2xl font-bold md:text-3xl" style={{ color: 'var(--ink-strong)' }}>
+    Cómo trabajamos
+  </h2>
+
+  <p
+    class="mt-space-3 max-w-2xl border-l-4 p-space-2 text-base"
+    style={{ borderColor: 'var(--border-strong)', backgroundColor: 'var(--surface-1)', color: 'var(--ink-base)' }}
+  >
+    Los pedidos personalizados requieren un anticipo del 50% para iniciar producción. El
+    saldo restante debe quedar liquidado antes de la entrega.
+  </p>
+
+  <div class="mt-space-6">
+    <ProcessSteps />
+  </div>
+
+  <div class="mt-space-4 flex justify-center md:justify-start">
+    <Button
+      variant="primary"
+      href={href}
+      label="Iniciar cotización por WhatsApp"
+      testId="cta-trust-whatsapp"
+      isWhatsapp
+      fullWidthMobile
+    />
+  </div>
+</section>

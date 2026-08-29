@@ -1,0 +1,74 @@
+---
+/**
+ * Footer (spec §8.6). Padding inferior minimo 96px (pb-24 = 6rem = 96px)
+ * para que el bloque legal nunca quede debajo del FAB. El bloque legal
+ * lleva data-wa-footer-guard: el script oculta el FAB mientras colisionen.
+ */
+import PlaceholderBox from './ui/PlaceholderBox.astro';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer
+  class="border-t pt-space-6 pb-24 md:pt-space-8"
+  style={{ borderColor: 'var(--border-hairline)', backgroundColor: 'var(--surface-1)' }}
+>
+  <div class="mx-auto max-w-container px-space-2 md:px-space-6">
+    <div class="grid grid-cols-1 gap-space-4 md:grid-cols-4 md:gap-space-3">
+      <div>
+        <PlaceholderBox label="[LOGO PLACEHOLDER — NO ASSET REAL]" class="h-10 w-32" />
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold" style={{ color: 'var(--ink-strong)' }}>Dirección</h3>
+        <p class="mt-space-1 text-sm" style={{ color: 'var(--ink-muted)' }}>
+          [DIRECCIÓN PLACEHOLDER — PENDIENTE DE ANDRI]
+        </p>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold" style={{ color: 'var(--ink-strong)' }}>Horario</h3>
+        <p class="mt-space-1 text-sm" style={{ color: 'var(--ink-muted)' }}>
+          [HORARIO PLACEHOLDER — PENDIENTE DE ANDRI]
+        </p>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold" style={{ color: 'var(--ink-strong)' }}>Enlaces</h3>
+        <ul class="mt-space-1 flex flex-col gap-space-1 text-sm">
+          <li>
+            <a
+              href="#"
+              data-testid="footer-link-privacidad"
+              class="underline-offset-4 hover:underline"
+              style={{ color: 'var(--ink-muted)' }}
+            >
+              [Aviso de privacidad — placeholder]
+            </a>
+          </li>
+          <li>
+            <a
+              href="#"
+              data-testid="footer-link-terminos"
+              class="underline-offset-4 hover:underline"
+              style={{ color: 'var(--ink-muted)' }}
+            >
+              [Términos y condiciones — placeholder]
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div
+      data-wa-footer-guard
+      class="mt-space-6 border-t pt-space-3 text-xs"
+      style={{ borderColor: 'var(--border-hairline)', color: 'var(--ink-muted)' }}
+    >
+      <p>© {currentYear} Imprenta Escalante. Todos los derechos reservados.</p>
+      <p class="mt-space-1">
+        Contenido legal definitivo pendiente — esta es una landing en fase de maquetado (Fase 1).
+      </p>
+    </div>
+  </div>
+</footer>

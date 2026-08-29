@@ -1,0 +1,100 @@
+---
+/**
+ * FAB flotante de WhatsApp (spec §8.3).
+ *
+ * - Ancla al viewport (position: fixed), nunca a una columna del grid.
+ * - Hitbox 56x56px. Mantiene una caja de exclusion de 72x72px en la
+ *   esquina inferior derecha: ninguna seccion debe poner contenido ahi
+ *   (por eso cada seccion / el footer llevan padding inferior propio).
+ * - No se renderiza si PUBLIC_WHATSAPP_E164 no esta configurado.
+ */
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+const href = buildWhatsappHref('Cotización general', 'general', 'fab');
+---
+
+{
+  href && (
+    <>
+      <a
+        id="fab-whatsapp"
+        href={href}
+        data-testid="fab-whatsapp"
+        data-wa-link
+        aria-label="Cotizar por WhatsApp"
+        class="wa-fab group fixed z-40 flex h-14 w-14 items-center justify-center border-2 text-sm font-semibold shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={{
+          borderColor: 'var(--border-strong)',
+          backgroundColor: 'var(--surface-0)',
+          color: 'var(--ink-strong)',
+        }}
+      >
+        <span data-wa-label aria-hidden="true">
+          [WA]
+        </span>
+        <span
+          class="pointer-events-none absolute bottom-full right-0 mb-space-1 whitespace-nowrap border px-space-1 py-space-1 text-xs opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+          style={{
+            borderColor: 'var(--border-hairline)',
+            backgroundColor: 'var(--surface-0)',
+            color: 'var(--ink-base)',
+          }}
+        >
+          Cotizar por WhatsApp
+        </span>
+      </a>
+
+      <div
+        data-wa-error-panel-for="fab-whatsapp"
+        hidden
+        role="alert"
+        class="fixed z-40 max-w-[260px] border p-space-2 text-sm wa-fab-error"
+        style={{ borderColor: 'var(--border-hairline)', backgroundColor: 'var(--surface-1)', color: 'var(--ink-base)' }}
+      >
+        <p>No pudimos abrir WhatsApp automáticamente. Copia el enlace:</p>
+        <p class="mt-space-1 break-all font-mono text-xs" style={{ color: 'var(--ink-strong)' }}>{href}</p>
+        <button
+          type="button"
+          data-wa-error-dismiss
+          class="mt-space-1 border px-space-1 py-space-1 text-xs"
+          style={{ borderColor: 'var(--border-hairline)' }}
+        >
+          Cerrar
+        </button>
+      </div>
+    </>
+  )
+}
+
+<style>
+  .wa-fab {
+    right: var(--fab-offset-mobile);
+    bottom: calc(var(--fab-offset-mobile) + env(safe-area-inset-bottom));
+  }
+
+  .wa-fab-error {
+    right: var(--fab-offset-mobile);
+    bottom: calc(
+      var(--fab-offset-mobile) + env(safe-area-inset-bottom) + var(--fab-hitbox) + 8px
+    );
+  }
+
+  @media (min-width: 768px) {
+    .wa-fab {
+      right: var(--fab-offset-desktop);
+      bottom: var(--fab-offset-desktop);
+    }
+
+    .wa-fab-error {
+      right: var(--fab-offset-desktop);
+      bottom: calc(var(--fab-offset-desktop) + var(--fab-hitbox) + 8px);
+    }
+  }
+
+  /* Teclado virtual (input enfocado + viewport reducido) y colision con el
+     bloque legal del footer: el FAB se oculta por completo (spec §8.3.6-7). */
+  .wa-fab.is-hidden-by-keyboard,
+  .wa-fab.is-hidden-by-footer {
+    display: none;
+  }
+</style>

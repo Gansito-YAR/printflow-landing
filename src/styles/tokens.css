@@ -1,0 +1,44 @@
+/*
+ * Design tokens — Fase 1 (escala de grises, sin identidad de marca).
+ * Regla dura: ningun componente usa un color literal. Todo pasa por estas
+ * variables. Si se necesita un tono nuevo, se agrega aqui, nunca inline.
+ */
+:root {
+  /* Superficies — se reemplazaran por la paleta de marca en Etapa 2 */
+  --surface-0: #ffffff; /* fondo de pagina */
+  --surface-1: #f5f5f5; /* tarjetas, bloques */
+  --surface-2: #e0e0e0; /* placeholders de imagen */
+  --surface-3: #bdbdbd; /* tramas, separadores fuertes */
+
+  /* Tinta */
+  --ink-strong: #111111; /* titulos */
+  --ink-base: #333333; /* cuerpo */
+  --ink-muted: #757575; /* secundario, deshabilitado */
+
+  /* Bordes */
+  --border-hairline: #d4d4d4;
+  --border-strong: #111111;
+
+  /* Grid de 8 puntos */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-7: 56px;
+  --space-8: 64px;
+  --space-9: 72px;
+  --space-10: 80px;
+
+  /* Layout */
+  --header-height-desktop: 72px;
+  --header-height-mobile: 56px;
+  --container-max: 1344px;
+
+  /* FAB — caja de exclusion 72x72px, hitbox 56x56px */
+  --fab-hitbox: 56px;
+  --fab-exclusion: 72px;
+  --fab-offset-desktop: 24px;
+  --fab-offset-mobile: 16px;
+}

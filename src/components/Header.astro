@@ -1,0 +1,41 @@
+---
+import PlaceholderBox from './ui/PlaceholderBox.astro';
+import Button from './ui/Button.astro';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+const href = buildWhatsappHref('Cotización general', 'general', 'hero');
+---
+
+<header
+  class="border-b h-space-7 md:h-space-9"
+  style={{ borderColor: 'var(--border-hairline)', backgroundColor: 'var(--surface-0)' }}
+>
+  <div
+    class="mx-auto flex h-full max-w-container items-center justify-between px-space-2 md:px-space-6"
+  >
+    <a href="#" aria-label="Imprenta Escalante — inicio" data-testid="logo-home-link">
+      <PlaceholderBox
+        label="[LOGO PLACEHOLDER — NO ASSET REAL]"
+        class="h-8 w-28 md:h-10 md:w-32"
+      />
+    </a>
+
+    <nav aria-label="Navegación principal" class="flex items-center gap-space-3">
+      <a
+        href="#servicios"
+        data-testid="nav-servicios"
+        class="hidden text-sm font-medium underline-offset-4 hover:underline md:inline-flex"
+        style={{ color: 'var(--ink-base)' }}
+      >
+        Servicios
+      </a>
+      <Button
+        variant="primary"
+        href={href}
+        label="Cotizar por WhatsApp"
+        testId="cta-header-whatsapp"
+        isWhatsapp
+      />
+    </nav>
+  </div>
+</header>
