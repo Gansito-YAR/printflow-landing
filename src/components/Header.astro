@@ -1,4 +1,9 @@
 ---
+/**
+ * Header publico (spec §8.1). Alturas 56px movil / 72px escritorio — NO TOCAR.
+ * Superficie oscura de marca: la clase .surface-inverse redefine los tokens
+ * de tinta, borde y foco para que todo lo de adentro siga cumpliendo AA.
+ */
 import PlaceholderBox from './ui/PlaceholderBox.astro';
 import Button from './ui/Button.astro';
 import { buildWhatsappHref } from '../lib/whatsapp';
@@ -6,14 +11,16 @@ import { buildWhatsappHref } from '../lib/whatsapp';
 const href = buildWhatsappHref('Cotización general', 'general', 'hero');
 ---
 
-<header
-  class="border-b h-space-7 md:h-space-9"
-  style={{ borderColor: 'var(--border-hairline)', backgroundColor: 'var(--surface-0)' }}
->
+<header class="surface-inverse border-b border-line-hairline bg-surface-inverse h-space-7 md:h-space-9">
   <div
     class="mx-auto flex h-full max-w-container items-center justify-between px-space-2 md:px-space-6"
   >
-    <a href="#" aria-label="Imprenta Escalante — inicio" data-testid="logo-home-link">
+    <a
+      href="/"
+      aria-label="Imprenta Escalante — inicio"
+      data-testid="logo-home-link"
+      class="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+    >
       <PlaceholderBox
         label="[LOGO PLACEHOLDER — NO ASSET REAL]"
         class="h-8 w-28 md:h-10 md:w-32"
@@ -24,8 +31,7 @@ const href = buildWhatsappHref('Cotización general', 'general', 'hero');
       <a
         href="#servicios"
         data-testid="nav-servicios"
-        class="hidden text-sm font-medium underline-offset-4 hover:underline md:inline-flex"
-        style={{ color: 'var(--ink-base)' }}
+        class="hidden text-small font-semibold text-ink-inverse underline-offset-4 transition-colors duration-fast hover:underline md:inline-flex"
       >
         Servicios
       </a>

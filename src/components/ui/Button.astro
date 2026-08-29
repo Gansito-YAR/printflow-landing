@@ -7,8 +7,13 @@
  * Cuando `isWhatsapp` es true, el boton queda marcado con data-wa-link para
  * que src/lib/wa-cta-client.ts le agregue el comportamiento de
  * Loading/Error/target por viewport (progresivo: sin JS, el <a href> igual
- * navega).
+ * navega y conserva target/rel, que se renderizan en el HTML estatico).
+ *
+ * Color: solo clases de Tailwind mapeadas a la capa semantica de tokens.css.
+ * Prohibido un hex, una primitiva --brand-* o un atributo style con color.
  */
+import WhatsAppIcon from './WhatsAppIcon.astro';
+
 interface Props {
   variant?: 'primary' | 'secondary';
   href: string | null;
@@ -17,7 +22,8 @@ interface Props {
   isWhatsapp?: boolean;
   size?: 'md' | 'lg';
   fullWidthMobile?: boolean;
-  minWidthDesktop?: string;
+  /** Aplica el ancho minimo de 240px en desktop que exige la §8.2 de Fase 1. */
+  wideDesktop?: boolean;
   class?: string;
 }
 
@@ -29,7 +35,7 @@ const {
   isWhatsapp = false,
   size = 'md',
   fullWidthMobile = false,
-  minWidthDesktop,
+  wideDesktop = false,
   class: className = '',
 } = Astro.props;
 
@@ -37,15 +43,16 @@ const isDisabled = href === null;
 
 const heightClass = size === 'lg' ? 'h-space-7' : 'h-12'; // 56px | 48px
 const widthClass = fullWidthMobile ? 'w-full md:w-auto' : '';
+const wideClass = wideDesktop ? 'md:min-w-[240px]' : '';
 
 const base =
-  'inline-flex items-center justify-center gap-space-1 px-space-3 text-sm md:text-[15px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2';
+  'inline-flex items-center justify-center gap-space-1 rounded-sm px-space-3 text-small md:text-body font-semibold transition-colors duration-base focus-visible:outline-2 focus-visible:outline-offset-2';
 
 const variantClass = isDisabled
-  ? 'cursor-not-allowed border-2 border-dashed'
+  ? 'cursor-not-allowed border-2 border-dashed border-action-disabled-border bg-action-disabled text-action-disabled-text'
   : variant === 'primary'
-    ? 'border-2 hover:bg-[var(--surface-2)]'
-    : 'border-2 border-transparent underline-offset-4 hover:underline';
+    ? 'border-2 border-action-primary-border bg-action-primary text-action-primary-text shadow-sm hover:bg-action-primary-hover hover:underline underline-offset-4'
+    : 'border-2 border-transparent text-action-secondary-text underline-offset-4 hover:underline';
 ---
 
 {
@@ -55,12 +62,7 @@ const variantClass = isDisabled
       disabled
       aria-disabled="true"
       data-testid={testId}
-      class:list={[base, heightClass, widthClass, variantClass, className]}
-      style={{
-        borderColor: 'var(--border-hairline)',
-        color: 'var(--ink-muted)',
-        backgroundColor: 'var(--surface-1)',
-      }}
+      class:list={[base, heightClass, widthClass, wideClass, variantClass, className]}
       title="Configura PUBLIC_WHATSAPP_E164 para habilitar este enlace"
     >
       Contacto no disponible
@@ -71,21 +73,11 @@ const variantClass = isDisabled
       href={href}
       data-testid={testId}
       data-wa-link={isWhatsapp ? '' : undefined}
-      class:list={[base, heightClass, widthClass, variantClass, className]}
-      style={
-        variant === 'primary'
-          ? {
-              borderColor: 'var(--border-strong)',
-              color: 'var(--ink-strong)',
-              backgroundColor: 'var(--surface-0)',
-              minWidth: minWidthDesktop,
-            }
-          : {
-              color: 'var(--ink-base)',
-              minWidth: minWidthDesktop,
-            }
-      }
+      target={isWhatsapp ? '_blank' : undefined}
+      rel={isWhatsapp ? 'noopener noreferrer' : undefined}
+      class:list={[base, heightClass, widthClass, wideClass, variantClass, className]}
     >
+      {isWhatsapp && <WhatsAppIcon />}
       <span data-wa-label={isWhatsapp ? '' : undefined}>{label}</span>
     </a>
   )
@@ -97,16 +89,14 @@ const variantClass = isDisabled
       data-wa-error-panel-for={testId}
       hidden
       role="alert"
-      class="mt-space-1 max-w-sm border p-space-2 text-sm"
-      style={{ borderColor: 'var(--border-hairline)', backgroundColor: 'var(--surface-1)', color: 'var(--ink-base)' }}
+      class="mt-space-1 max-w-sm rounded-md border border-line-hairline bg-surface-1 p-space-2 text-small text-ink-base shadow-md"
     >
       <p>No pudimos abrir WhatsApp automáticamente. Copia el enlace y pégalo en tu navegador:</p>
-      <p class="mt-space-1 break-all font-mono text-xs" style={{ color: 'var(--ink-strong)' }}>{href}</p>
+      <p class="mt-space-1 break-all font-mono text-x-small text-ink-strong">{href}</p>
       <button
         type="button"
         data-wa-error-dismiss
-        class="mt-space-1 border px-space-1 py-space-1 text-xs"
-        style={{ borderColor: 'var(--border-hairline)' }}
+        class="mt-space-1 rounded-sm border border-line-hairline px-space-1 py-space-1 text-x-small text-ink-base transition-colors duration-fast hover:bg-surface-2"
       >
         Cerrar
       </button>

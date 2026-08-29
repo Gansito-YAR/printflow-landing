@@ -1,4 +1,8 @@
 ---
+/**
+ * Hero (spec §8.2). Estructura intocable: desktop texto en columnas 1-7 y
+ * visual en 8-12; mobile H1 -> apoyo -> CTA -> visual, en ese orden.
+ */
 import PlaceholderBox from './ui/PlaceholderBox.astro';
 import Button from './ui/Button.astro';
 import { buildWhatsappHref } from '../lib/whatsapp';
@@ -11,14 +15,11 @@ const href = buildWhatsappHref('Cotización general', 'general', 'hero');
   class="mx-auto max-w-container px-space-2 py-space-6 md:grid md:grid-cols-12 md:items-center md:gap-space-3 md:px-space-6 md:py-space-8"
 >
   <div class="flex flex-col gap-space-3 md:col-span-7">
-    <h1
-      class="text-3xl font-bold leading-tight md:text-5xl"
-      style={{ color: 'var(--ink-strong)' }}
-    >
+    <h1 class="font-display text-h1 uppercase text-ink-strong md:text-h1-desktop">
       Cotiza tus impresos por WhatsApp y da seguimiento a tu pedido
     </h1>
 
-    <p class="max-w-xl text-base md:text-lg" style={{ color: 'var(--ink-base)' }}>
+    <p class="max-w-xl text-body text-ink-base md:text-body-lg">
       Lonas, viniles, papelería comercial y promocionales para menudeo y mayoreo.
     </p>
 
@@ -31,7 +32,7 @@ const href = buildWhatsappHref('Cotización general', 'general', 'hero');
         isWhatsapp
         size="lg"
         fullWidthMobile
-        minWidthDesktop="240px"
+        wideDesktop
       />
       <Button
         variant="secondary"
