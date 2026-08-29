@@ -1,25 +1,101 @@
 /*
- * Design tokens — Fase 1 (escala de grises, sin identidad de marca).
- * Regla dura: ningun componente usa un color literal. Todo pasa por estas
- * variables. Si se necesita un tono nuevo, se agrega aqui, nunca inline.
+ * Design tokens — Fase 2 (identidad visual Imprenta Escalante).
+ *
+ * ARQUITECTURA DE DOS CAPAS (Fase 2 §1.1). No la rompas:
+ *
+ *   Capa 1 — PRIMITIVAS: la paleta cruda, sin significado asignado.
+ *            Es el UNICO lugar del proyecto donde puede vivir un hexadecimal.
+ *   Capa 2 — SEMANTICAS: los nombres que consumen los componentes. Apuntan a
+ *            primitivas, nunca al reves.
+ *
+ * Regla dura: ningun componente menciona una primitiva --brand-* ni un color
+ * literal. Los componentes usan clases de Tailwind mapeadas a la capa 2
+ * (ver tailwind.config.mjs). Si el dueno pide "menos naranja", se cambia UN
+ * valor en la capa 1 y el sitio entero se reajusta con coherencia.
  */
+
+/* ========================================================================
+ * CAPA 1 — PRIMITIVAS
+ * ===================================================================== */
 :root {
-  /* Superficies — se reemplazaran por la paleta de marca en Etapa 2 */
-  --surface-0: #ffffff; /* fondo de pagina */
-  --surface-1: #f5f5f5; /* tarjetas, bloques */
-  --surface-2: #e0e0e0; /* placeholders de imagen */
-  --surface-3: #bdbdbd; /* tramas, separadores fuertes */
+  /* Naranja de marca. Tomado del material grafico de la imprenta. */
+  --brand-50: #fef4ec;
+  --brand-100: #fde3cd;
+  --brand-200: #fbc79b;
+  --brand-300: #f9a869;
+  --brand-500: #f47920; /* tono principal de la marca */
+  --brand-600: #db6812;
+  --brand-700: #b0540f; /* hover del CTA primario */
+  --brand-900: #6b330a;
 
-  /* Tinta */
-  --ink-strong: #111111; /* titulos */
-  --ink-base: #333333; /* cuerpo */
-  --ink-muted: #757575; /* secundario, deshabilitado */
+  /* Neutros. El negro carbon del material impreso, no un negro puro. */
+  --neutral-0: #ffffff;
+  --neutral-50: #fafafa;
+  --neutral-100: #f4f4f5;
+  --neutral-200: #e4e4e7;
+  --neutral-300: #d4d4d8;
+  --neutral-500: #52525b;
+  --neutral-700: #33333a;
+  --neutral-900: #1c1c20;
+  --neutral-950: #121215; /* superficies oscuras: header y footer */
 
-  /* Bordes */
-  --border-hairline: #d4d4d4;
-  --border-strong: #111111;
+  /* Sombras — unica excepcion donde se usa rgb() en la capa de primitivas. */
+  --shadow-raw-sm: 0 1px 2px rgb(18 18 21 / 0.08);
+  --shadow-raw-md: 0 4px 12px rgb(18 18 21 / 0.14);
+  --shadow-raw-lg: 0 8px 24px rgb(18 18 21 / 0.18);
+}
 
-  /* Grid de 8 puntos */
+/* ========================================================================
+ * CAPA 2 — SEMANTICAS
+ * ===================================================================== */
+:root {
+  /* --- Superficies --- */
+  --surface-0: var(--neutral-0); /* fondo de pagina */
+  --surface-1: var(--neutral-100); /* tarjetas, bloques */
+  --surface-2: var(--neutral-200); /* placeholders de imagen */
+  --surface-3: var(--neutral-300); /* tramas, separadores fuertes */
+  --surface-inverse: var(--neutral-950); /* header y footer */
+  --surface-brand: var(--brand-500); /* bloques de acento */
+
+  /* --- Tinta --- */
+  --ink-strong: var(--neutral-900); /* titulos */
+  --ink-base: var(--neutral-700); /* cuerpo */
+  --ink-muted: var(--neutral-500); /* secundario, deshabilitado */
+  --ink-inverse: var(--neutral-0); /* texto sobre superficie oscura */
+  --ink-inverse-muted: var(--neutral-300); /* secundario sobre oscuro */
+  --ink-brand: var(--brand-700); /* acento textual sobre fondo claro */
+  --ink-onBrand: var(--neutral-950); /* texto sobre el naranja de marca */
+
+  /* --- Bordes --- */
+  --border-hairline: var(--neutral-300);
+  --border-strong: var(--neutral-900);
+  --border-inverse: var(--neutral-700); /* separadores sobre oscuro */
+  --border-brand: var(--brand-700);
+
+  /* --- Accion primaria --- */
+  --action-primary-bg: var(--brand-500);
+  --action-primary-text: var(--ink-onBrand);
+  --action-primary-border: var(--brand-700);
+  --action-primary-bg-hover: var(--brand-600);
+
+  /* --- Accion secundaria --- */
+  --action-secondary-text: var(--ink-brand);
+  --action-secondary-border: var(--border-brand);
+
+  /* --- Accion deshabilitada --- */
+  --action-disabled-bg: var(--neutral-100);
+  --action-disabled-text: var(--neutral-500);
+  /* neutral-300 daba 1.34:1 contra el fondo deshabilitado y los bordes de
+   * control exigen 3:1 (Fase 2 §1.2.2). neutral-500 da 7.03:1 y ademas
+   * refuerza que el estado no dependa solo del tono. */
+  --action-disabled-border: var(--neutral-500);
+
+  /* --- Foco ---
+   * Se resuelve por token para que contraste contra su fondo. Las secciones
+   * oscuras lo sobrescriben con .surface-inverse mas abajo (Fase 2 §1.2.4). */
+  --focus-ring: var(--neutral-900);
+
+  /* --- Grid de 8 puntos (Fase 1 §6.2) — NO TOCAR --- */
   --space-1: 8px;
   --space-2: 16px;
   --space-3: 24px;
@@ -31,14 +107,61 @@
   --space-9: 72px;
   --space-10: 80px;
 
-  /* Layout */
+  /* --- Layout (Fase 1 §6.2) — NO TOCAR --- */
   --header-height-desktop: 72px;
   --header-height-mobile: 56px;
   --container-max: 1344px;
 
-  /* FAB — caja de exclusion 72x72px, hitbox 56x56px */
+  /* --- FAB (Fase 1 §8.3) — NO TOCAR --- */
   --fab-hitbox: 56px;
   --fab-exclusion: 72px;
   --fab-offset-desktop: 24px;
   --fab-offset-mobile: 16px;
+
+  /* --- Tipografia (Fase 2 §2.4) --- */
+  --font-display: 'Anton', 'Arial Narrow', 'Helvetica Neue', system-ui, sans-serif;
+  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --text-h1: 2rem; /* 32px mobile */
+  --text-h1-desktop: 3.5rem; /* 56px */
+  --text-h2: 1.5rem; /* 24px */
+  --text-h2-desktop: 2rem; /* 32px */
+  --text-h3: 1.125rem; /* 18px */
+  --text-body: 1rem; /* 16px */
+  --text-body-lg: 1.125rem; /* 18px */
+  --text-small: 0.875rem; /* 14px */
+  --text-xs: 0.75rem; /* 12px */
+
+  /* --- Radios y elevacion (Fase 2 §4.1 y §4.2) --- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+
+  --shadow-sm: var(--shadow-raw-sm);
+  --shadow-md: var(--shadow-raw-md);
+  --shadow-lg: var(--shadow-raw-lg);
+
+  /* --- Movimiento (Fase 2 §4.3) --- */
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+}
+
+/*
+ * Contexto oscuro. Se aplica a header y footer. Redefine los tokens
+ * semanticos de tinta, borde y foco para que TODO lo que viva dentro siga
+ * cumpliendo AA sin que el componente tenga que saberlo.
+ */
+.surface-inverse {
+  --ink-strong: var(--neutral-0);
+  --ink-base: var(--neutral-0);
+  --ink-muted: var(--neutral-300);
+  /* Las superficies internas tambien se invierten. Si no, un placeholder
+   * gris claro heredaria tinta clara y quedaria ilegible. */
+  --surface-1: var(--neutral-900);
+  --surface-2: var(--neutral-900);
+  --border-hairline: var(--neutral-700);
+  --border-strong: var(--neutral-0);
+  --focus-ring: var(--brand-500);
+  --action-disabled-bg: var(--neutral-900);
+  --action-disabled-text: var(--neutral-300);
+  --action-disabled-border: var(--neutral-700);
 }
