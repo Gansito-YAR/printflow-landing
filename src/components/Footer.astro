@@ -1,0 +1,72 @@
+---
+/**
+ * Footer (spec §8.6). Padding inferior minimo 96px (pb-24) para que el
+ * bloque legal nunca quede debajo del FAB. El bloque legal lleva
+ * data-wa-footer-guard: el script oculta el FAB mientras colisionen.
+ *
+ * Superficie oscura de marca: .surface-inverse redefine tinta, borde y foco.
+ */
+import PlaceholderBox from './ui/PlaceholderBox.astro';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer
+  class="surface-inverse border-t border-line-hairline bg-surface-inverse pt-space-6 pb-24 md:pt-space-8"
+>
+  <div class="mx-auto max-w-container px-space-2 md:px-space-6">
+    <div class="grid grid-cols-1 gap-space-4 md:grid-cols-4 md:gap-space-3">
+      <div>
+        <PlaceholderBox label="[LOGO PLACEHOLDER — NO ASSET REAL]" class="h-10 w-32" />
+      </div>
+
+      <div>
+        <h3 class="font-display text-h3 uppercase text-ink-inverse">Dirección</h3>
+        {/* Dato real pendiente de Andri. Texto neutro que no afirma nada
+            falso, en lugar de corchetes visibles (Fase 2 §5.6). */}
+        <p class="mt-space-1 text-small text-ink-muted">
+          Consulta nuestra ubicación por WhatsApp.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="font-display text-h3 uppercase text-ink-inverse">Horario</h3>
+        {/* Dato real pendiente de Andri. */}
+        <p class="mt-space-1 text-small text-ink-muted">
+          Consulta nuestro horario de atención por WhatsApp.
+        </p>
+      </div>
+
+      <div>
+        <h3 class="font-display text-h3 uppercase text-ink-inverse">Enlaces</h3>
+        <ul class="mt-space-1 flex flex-col gap-space-1 text-small">
+          <li>
+            <a
+              href="#"
+              data-testid="footer-link-privacidad"
+              class="rounded-sm text-ink-muted underline-offset-4 transition-colors duration-fast hover:text-ink-inverse hover:underline"
+            >
+              Aviso de privacidad
+            </a>
+          </li>
+          <li>
+            <a
+              href="#"
+              data-testid="footer-link-terminos"
+              class="rounded-sm text-ink-muted underline-offset-4 transition-colors duration-fast hover:text-ink-inverse hover:underline"
+            >
+              Términos y condiciones
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div
+      data-wa-footer-guard
+      class="mt-space-6 border-t border-line-hairline pt-space-3 text-x-small text-ink-muted"
+    >
+      <p>© {currentYear} Imprenta Escalante. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>

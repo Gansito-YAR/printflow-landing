@@ -1,0 +1,88 @@
+---
+/**
+ * FAB flotante de WhatsApp (spec §8.3). Las 9 reglas de la Fase 1 se
+ * conservan INTACTAS; la Fase 2 solo le agrega color, elevacion y el icono
+ * real de la marca.
+ *
+ * - Ancla al viewport (position: fixed), nunca a una columna del grid.
+ * - Hitbox 56x56px. Mantiene una caja de exclusion de 72x72px en la
+ *   esquina inferior derecha: ninguna seccion pone contenido ahi.
+ * - No se renderiza si PUBLIC_WHATSAPP_E164 no esta configurado.
+ */
+import WhatsAppIcon from './ui/WhatsAppIcon.astro';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+const href = buildWhatsappHref('Cotización general', 'general', 'fab');
+---
+
+{
+  href && (
+    <>
+      <a
+        id="fab-whatsapp"
+        href={href}
+        data-testid="fab-whatsapp"
+        data-wa-link
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Cotizar por WhatsApp"
+        class="wa-fab group fixed z-40 flex h-14 w-14 items-center justify-center rounded-md border-2 border-action-primary-border bg-action-primary text-action-primary-text shadow-lg transition-colors duration-base hover:bg-action-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2"
+      >
+        <WhatsAppIcon class="h-7 w-7" />
+        <span data-wa-label class="pointer-events-none absolute bottom-full right-0 mb-space-1 whitespace-nowrap rounded-sm border border-line-hairline bg-surface-0 px-space-1 py-space-1 text-x-small text-ink-base opacity-0 shadow-md transition-opacity duration-base group-hover:opacity-100 group-focus-visible:opacity-100">
+          Cotizar por WhatsApp
+        </span>
+      </a>
+
+      <div
+        data-wa-error-panel-for="fab-whatsapp"
+        hidden
+        role="alert"
+        class="wa-fab-error fixed z-40 max-w-[260px] rounded-md border border-line-hairline bg-surface-1 p-space-2 text-small text-ink-base shadow-lg"
+      >
+        <p>No pudimos abrir WhatsApp automáticamente. Copia el enlace:</p>
+        <p class="mt-space-1 break-all font-mono text-x-small text-ink-strong">{href}</p>
+        <button
+          type="button"
+          data-wa-error-dismiss
+          class="mt-space-1 rounded-sm border border-line-hairline px-space-1 py-space-1 text-x-small text-ink-base transition-colors duration-fast hover:bg-surface-2"
+        >
+          Cerrar
+        </button>
+      </div>
+    </>
+  )
+}
+
+<style>
+  .wa-fab {
+    right: var(--fab-offset-mobile);
+    bottom: calc(var(--fab-offset-mobile) + env(safe-area-inset-bottom));
+  }
+
+  .wa-fab-error {
+    right: var(--fab-offset-mobile);
+    bottom: calc(
+      var(--fab-offset-mobile) + env(safe-area-inset-bottom) + var(--fab-hitbox) + 8px
+    );
+  }
+
+  @media (min-width: 768px) {
+    .wa-fab {
+      right: var(--fab-offset-desktop);
+      bottom: var(--fab-offset-desktop);
+    }
+
+    .wa-fab-error {
+      right: var(--fab-offset-desktop);
+      bottom: calc(var(--fab-offset-desktop) + var(--fab-hitbox) + 8px);
+    }
+  }
+
+  /* Teclado virtual (input enfocado + viewport reducido) y colision con el
+     bloque legal del footer: el FAB se oculta por completo (spec §8.3.6-7). */
+  .wa-fab.is-hidden-by-keyboard,
+  .wa-fab.is-hidden-by-footer {
+    display: none;
+  }
+</style>

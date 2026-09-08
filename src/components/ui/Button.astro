@@ -1,0 +1,105 @@
+---
+/**
+ * CTA de la landing. Variantes: primary | secondary | disabled.
+ * La variante "disabled" no se elige a mano: se activa sola cuando `href`
+ * es null (spec §9.4 — falta PUBLIC_WHATSAPP_E164).
+ *
+ * Cuando `isWhatsapp` es true, el boton queda marcado con data-wa-link para
+ * que src/lib/wa-cta-client.ts le agregue el comportamiento de
+ * Loading/Error/target por viewport (progresivo: sin JS, el <a href> igual
+ * navega y conserva target/rel, que se renderizan en el HTML estatico).
+ *
+ * Color: solo clases de Tailwind mapeadas a la capa semantica de tokens.css.
+ * Prohibido un hex, una primitiva --brand-* o un atributo style con color.
+ */
+import WhatsAppIcon from './WhatsAppIcon.astro';
+
+interface Props {
+  variant?: 'primary' | 'secondary';
+  href: string | null;
+  label: string;
+  testId: string;
+  isWhatsapp?: boolean;
+  size?: 'md' | 'lg';
+  fullWidthMobile?: boolean;
+  /** Aplica el ancho minimo de 240px en desktop que exige la §8.2 de Fase 1. */
+  wideDesktop?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'primary',
+  href,
+  label,
+  testId,
+  isWhatsapp = false,
+  size = 'md',
+  fullWidthMobile = false,
+  wideDesktop = false,
+  class: className = '',
+} = Astro.props;
+
+const isDisabled = href === null;
+
+const heightClass = size === 'lg' ? 'h-space-7' : 'h-12'; // 56px | 48px
+const widthClass = fullWidthMobile ? 'w-full md:w-auto' : '';
+const wideClass = wideDesktop ? 'md:min-w-[240px]' : '';
+
+const base =
+  'inline-flex items-center justify-center gap-space-1 rounded-sm px-space-3 text-small md:text-body font-semibold transition-colors duration-base focus-visible:outline-2 focus-visible:outline-offset-2';
+
+const variantClass = isDisabled
+  ? 'cursor-not-allowed border-2 border-dashed border-action-disabled-border bg-action-disabled text-action-disabled-text'
+  : variant === 'primary'
+    ? 'border-2 border-action-primary-border bg-action-primary text-action-primary-text shadow-sm hover:bg-action-primary-hover hover:underline underline-offset-4'
+    : 'border-2 border-transparent text-action-secondary-text underline-offset-4 hover:underline';
+---
+
+{
+  isDisabled ? (
+    <button
+      type="button"
+      disabled
+      aria-disabled="true"
+      data-testid={testId}
+      class:list={[base, heightClass, widthClass, wideClass, variantClass, className]}
+      title="Configura PUBLIC_WHATSAPP_E164 para habilitar este enlace"
+    >
+      Contacto no disponible
+    </button>
+  ) : (
+    <a
+      id={testId}
+      href={href}
+      data-testid={testId}
+      data-wa-link={isWhatsapp ? '' : undefined}
+      target={isWhatsapp ? '_blank' : undefined}
+      rel={isWhatsapp ? 'noopener noreferrer' : undefined}
+      class:list={[base, heightClass, widthClass, wideClass, variantClass, className]}
+    >
+      {isWhatsapp && <WhatsAppIcon />}
+      <span data-wa-label={isWhatsapp ? '' : undefined}>{label}</span>
+    </a>
+  )
+}
+
+{
+  isWhatsapp && !isDisabled && (
+    <div
+      data-wa-error-panel-for={testId}
+      hidden
+      role="alert"
+      class="mt-space-1 max-w-sm rounded-md border border-line-hairline bg-surface-1 p-space-2 text-small text-ink-base shadow-md"
+    >
+      <p>No pudimos abrir WhatsApp automáticamente. Copia el enlace y pégalo en tu navegador:</p>
+      <p class="mt-space-1 break-all font-mono text-x-small text-ink-strong">{href}</p>
+      <button
+        type="button"
+        data-wa-error-dismiss
+        class="mt-space-1 rounded-sm border border-line-hairline px-space-1 py-space-1 text-x-small text-ink-base transition-colors duration-fast hover:bg-surface-2"
+      >
+        Cerrar
+      </button>
+    </div>
+  )
+}

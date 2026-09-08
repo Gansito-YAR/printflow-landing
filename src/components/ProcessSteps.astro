@@ -1,0 +1,48 @@
+---
+/**
+ * Proceso de 3 pasos (spec §8.5). Copia textual exacta — no reformular.
+ * Desktop: horizontal con conectores lineales.
+ * Mobile: vertical con conectores verticales y numeros 01/02/03 en cajas.
+ */
+const STEPS = [
+  {
+    number: '01',
+    title: 'Cotiza por WhatsApp.',
+    description: 'Comparte medidas y cantidad.',
+  },
+  {
+    number: '02',
+    title: 'Confirma y abona.',
+    description: 'Envías tu comprobante; se valida el pago y el pedido pasa a producción.',
+  },
+  {
+    number: '03',
+    title: 'Recibe con saldo liquidado.',
+    description: 'Se registra la fecha pactada y la entrega se autoriza solo con saldo $0.',
+  },
+] as const;
+---
+
+<ol class="grid grid-cols-1 gap-0 md:grid-cols-3 md:gap-space-3">
+  {
+    STEPS.map((step, index) => (
+      <li class="relative flex gap-space-2 pb-space-4 md:flex-col md:gap-space-2 md:pb-0">
+        <div class="flex flex-col items-center">
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm border-2 border-action-primary-border bg-action-primary font-display text-body text-action-primary-text">
+            {step.number}
+          </span>
+          {index < STEPS.length - 1 && (
+            <span
+              aria-hidden="true"
+              class="mt-space-1 w-px flex-1 bg-line-hairline md:absolute md:left-full md:top-6 md:mt-0 md:h-px md:w-full"
+            />
+          )}
+        </div>
+        <div>
+          <p class="font-semibold text-ink-strong">{step.title}</p>
+          <p class="mt-space-1 text-small text-ink-base">{step.description}</p>
+        </div>
+      </li>
+    ))
+  }
+</ol>

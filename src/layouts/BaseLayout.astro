@@ -1,0 +1,67 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /**
+   * Imagen de vista previa social, 1200x630 (Fase 2 §3.5). Mientras Andri no
+   * entregue el asset de marca, se omite: es preferible no declarar og:image
+   * a declarar una ruta que no existe, porque WhatsApp cachea el fallo.
+   */
+  ogImage?: string;
+}
+
+const { title, description, ogImage } = Astro.props;
+
+/**
+ * Astro.site sale de PUBLIC_SITE_URL (ver astro.config.mjs). Si no esta
+ * definida, Astro.url apunta a localhost durante el build; se omite la URL
+ * canonica antes que publicar una que apunte a la maquina de desarrollo.
+ */
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex" />
+    <title>{title}</title>
+
+    {/* Tipografia de marca (Fase 2 §2). Solo los pesos que se usan:
+        Anton 400 para display, Barlow 400/600/700 para cuerpo. */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;600;700&display=swap"
+    />
+
+    {/* Vista previa social (Fase 2 §3.5) */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:site_name" content="Imprenta Escalante" />
+    {ogImage && Astro.site && <meta property="og:image" content={new URL(ogImage, Astro.site).href} />}
+    {ogImage && <meta property="og:image:width" content="1200" />}
+    {ogImage && <meta property="og:image:height" content="630" />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+  </head>
+  <body>
+    <slot />
+
+    <script>
+      import { initWhatsappBehavior } from '../lib/wa-cta-client';
+      initWhatsappBehavior();
+    </script>
+  </body>
+</html>

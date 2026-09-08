@@ -1,0 +1,51 @@
+---
+/**
+ * Catalogo de servicios (spec §8.4). Incluye el estado Empty defensivo:
+ * el catalogo va embebido en el build, pero si llegara vacio la landing
+ * sigue ofreciendo una via de contacto.
+ */
+import ServiceCard from './ServiceCard.astro';
+import Button from './ui/Button.astro';
+import { SERVICES } from '../data/services';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+const fallbackHref = buildWhatsappHref('Cotización general', 'general', 'catalog');
+---
+
+<section
+  id="servicios"
+  data-testid="servicios"
+  class="mx-auto max-w-container px-space-2 py-space-6 md:px-space-6 md:py-space-8"
+>
+  <h2 class="font-display text-h2 uppercase text-ink-strong md:text-h2-desktop">
+    Nuestros servicios
+  </h2>
+  <p class="mt-space-1 max-w-2xl text-body text-ink-base">
+    Gran formato, papelería comercial y promocionales para menudeo y mayoreo.
+  </p>
+
+  {
+    SERVICES.length === 0 ? (
+      <div class="mt-space-4 rounded-md border border-line-hairline bg-surface-1 p-space-4 text-center">
+        <p class="text-ink-base">
+          El catálogo no está disponible. Cotiza directamente por WhatsApp
+        </p>
+        <div class="mt-space-3 flex justify-center">
+          <Button
+            variant="primary"
+            href={fallbackHref}
+            label="Cotizar por WhatsApp"
+            testId="cta-catalog-fallback-whatsapp"
+            isWhatsapp
+          />
+        </div>
+      </div>
+    ) : (
+      <div class="mt-space-4 grid grid-cols-1 gap-space-2 md:grid-cols-3 md:gap-space-3">
+        {SERVICES.map((service) => (
+          <ServiceCard service={service} />
+        ))}
+      </div>
+    )
+  }
+</section>

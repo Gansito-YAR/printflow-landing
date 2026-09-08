@@ -1,0 +1,47 @@
+---
+/**
+ * Tarjeta de servicio (spec §8.4): visual 4:3, nombre, descripcion de dos
+ * lineas y CTA "Cotizar [servicio]". El service_id sale de la allowlist
+ * tipada, nunca de texto libre del DOM.
+ */
+import PlaceholderBox from './ui/PlaceholderBox.astro';
+import Button from './ui/Button.astro';
+import type { Service } from '../data/services';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+interface Props {
+  service: Service;
+}
+
+const { service } = Astro.props;
+const href = buildWhatsappHref(service.label, service.id, 'catalog');
+---
+
+<article
+  class="flex flex-col rounded-md border border-line-hairline bg-surface-0 p-space-3 shadow-sm transition-shadow duration-base hover:border-line-brand hover:shadow-md"
+>
+  <PlaceholderBox
+    label="[IMAGEN SERVICIO 4:3 — PLACEHOLDER]"
+    ratio="4/3"
+    class="w-full"
+  />
+
+  <h3 class="mt-space-3 font-display text-h3 uppercase text-ink-strong">
+    {service.label}
+  </h3>
+
+  <p class="mt-space-1 line-clamp-2 text-small text-ink-base">
+    {service.description}
+  </p>
+
+  <div class="mt-space-3">
+    <Button
+      variant="primary"
+      href={href}
+      label={`Cotizar ${service.label}`}
+      testId={`cta-card-${service.id}`}
+      isWhatsapp
+      fullWidthMobile
+    />
+  </div>
+</article>

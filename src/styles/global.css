@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+@config '../../tailwind.config.mjs';
+@import './tokens.css';
+
+@theme inline {
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+html {
+  font-family: var(--font-body);
+}
+
+body {
+  background-color: var(--surface-0);
+  color: var(--ink-base);
+}
+
+/*
+ * Foco visible por teclado (Fase 1 §10). El color sale de --focus-ring, que
+ * las secciones oscuras redefinen para no perder contraste (Fase 2 §1.2.4).
+ */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/*
+ * Movimiento (Fase 2 §4.3 y §4.4). Transiciones cortas, solo en interaccion.
+ * Si el sistema pide menos movimiento, se desactiva todo.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
