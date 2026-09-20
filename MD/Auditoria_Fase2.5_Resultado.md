@@ -178,3 +178,72 @@ El conteo de 4 vs 5 CTA del §2.2 · qué hacer con las 5 vulnerabilidades de de
 ### Sigue sin verificarse
 
 Recorrido con `Tab`, zoom 200 %, carga con JavaScript desactivado y prueba en celular real. Son manuales y necesitan un navegador de verdad.
+
+---
+
+## 7 · Bloque 3 — segunda pasada: qué sí se pudo
+
+Tras el primer intento se encontró la vía para bajar las fotos a resolución
+completa: las miniaturas de la galería llevan `ctp=s206x206` en la URL, y
+**quitando ese parámetro el CDN devuelve el original** (1080–1145 px). Las 8
+fotos públicas se descargaron así, sin iniciar sesión.
+
+### Lo que se integró
+
+| Ubicación | Asset | Detalle |
+|---|---|---|
+| Header y footer | Logo | PNG con transparencia, extraído por luminancia del lockup de marca. Sin fondo propio, funciona sobre ambas superficies oscuras (§3.4.7) |
+| Hero | Lona instalada en vitrina | `eager` + `fetchpriority="high"`, 4:3, `object-cover`. 60 KB en WebP |
+| Tarjeta Gran formato | Vinil microperforado | `lazy`, 4:3. 34 KB en WebP |
+| Favicon | 256×256 + apple-touch-icon 180×180 | Derivados del isotipo |
+| Vista previa social | 1200×630 | Compuesta con la foto del hero atenuada, el logo y una barra de marca |
+
+**Peso: 286 KB de primera carga.** Ninguna imagen supera 200 KB.
+
+### Lo que NO se integró, y por qué
+
+De las 8 fotos públicas, **5 no son publicables**. No es un problema de encuadre
+—eso se arregla recortando— sino de contenido:
+
+| Foto | Problema |
+|---|---|
+| Etiquetas con corte registro | **Precios publicados** (`$180`, `$450`). La C-14 y la §3 de Fase 1 los prohíben |
+| Microperforado (placa completa) | **Precio** `$280 M²`. Se usó solo el recorte fotográfico, sin la banda de precio |
+| Figuras y personajes | **Spider-Man, Hulk y Capitán América.** Propiedad intelectual de Marvel |
+| Recetarios | **Datos personales de una tercera persona**: nombre completo de una doctora, cédula profesional, teléfono y correo. Regla G-06 |
+| Ofertón Dr. Simi · Lona Mercado Libre | Marcas de terceros y promoción con precios |
+
+Ninguna de las 8 es una fotografía de trabajo terminado: son **placas
+promocionales de redes** con texto de marketing incrustado. De ahí que solo
+tres regiones fotográficas resultaran limpias.
+
+**Consecuencia:** las tarjetas de **Papelería comercial** y **Promocionales**
+conservan su placeholder. No existe en el material público ninguna imagen de
+esas dos categorías que sea legal y publicable.
+
+### Lo que hace falta pedir
+
+- **Dos fotos de trabajos terminados**, una de papelería y una de promocionales.
+  El banner de portada muestra una playera y un termo con la marca: si existen
+  esas fotos sueltas, resuelven Promocionales.
+- **El logo vectorial** (`.svg`, `.ai` o `.pdf`). El PNG actual es un extraído
+  por luminancia y conserva algo de textura del fondo original. Sirve para
+  presentar, pero el §3.3 pide el original y tiene razón.
+
+### ✅ Verificación de cierre — Bloque 3 (actualizada)
+
+- [x] Los assets están **descargados dentro del repositorio**, no enlazados a Facebook
+- [x] **Cero** scripts, píxeles o recursos de Facebook — 0 coincidencias en `dist/index.html`
+- [x] Todas las imágenes pasan por `astro:assets` con `width` y `height`
+- [x] Hero con `eager` + `fetchpriority="high"`; el resto con `lazy`
+- [x] `alt` descriptivos y específicos. El del logo del header va vacío a propósito: el enlace ya lleva `aria-label` y se duplicaría
+- [x] Ninguna imagen supera 200 KB; la página completa en **286 KB**
+- [x] Las tarjetas conservan 4:3 con `object-fit: cover`; ninguna deformada
+- [x] El logo se ve correctamente sobre el header y el footer oscuros
+- [x] `og:image` de 1200×630 configurada *(requiere `PUBLIC_SITE_URL` para emitirse; sin ella se omite en lugar de publicar una ruta que ningún crawler resuelve)*
+- [x] Favicon real
+- [x] **El logo no se desborda del header en 320 ni 375 px** — mide 116×24 con 17 px de holgura
+- [x] Contraste: **0 fallos**, re-medido con las imágenes ya integradas
+- [ ] **Cero placeholders** — quedan 2 (Papelería y Promocionales)
+- [ ] Red lenta simulada — requiere navegador real
+- [ ] Lighthouse — requiere el deploy
