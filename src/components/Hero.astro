@@ -3,8 +3,9 @@
  * Hero (spec §8.2). Estructura intocable: desktop texto en columnas 1-7 y
  * visual en 8-12; mobile H1 -> apoyo -> CTA -> visual, en ese orden.
  */
-import PlaceholderBox from './ui/PlaceholderBox.astro';
+import { Image } from 'astro:assets';
 import Button from './ui/Button.astro';
+import heroImg from '../assets/hero-vitrina-vinil.jpg';
 import { buildWhatsappHref } from '../lib/whatsapp';
 
 const href = buildWhatsappHref('Cotización general', 'general', 'hero');
@@ -45,6 +46,15 @@ const href = buildWhatsappHref('Cotización general', 'general', 'hero');
   </div>
 
   <div class="mt-space-4 md:col-span-5 md:mt-0">
-    <PlaceholderBox label="[IMAGEN HERO — PLACEHOLDER]" ratio="4/3" class="w-full" />
+    {/* Es la imagen que mide el LCP: eager y fetchpriority alto (§3.4.3). */}
+    <Image
+      src={heroImg}
+      alt="Lona publicitaria de gran formato impresa e instalada en la vitrina de un local comercial"
+      width={1024}
+      height={768}
+      loading="eager"
+      fetchpriority="high"
+      class="aspect-[4/3] w-full rounded-md object-cover shadow-md"
+    />
   </div>
 </section>

@@ -10,12 +10,19 @@
  * accion del header y ahora se muestra tambien en movil, donde antes estaba
  * oculto y el header no ofrecia ninguna via de navegacion.
  *
+ * El logo es PNG con transparencia extraido del material de la imprenta. Al
+ * no llevar fondo propio, funciona igual sobre el header y el footer oscuros
+ * (Fase 2.5 §3.4.7). El alt va vacio a proposito: el enlace ya lleva
+ * aria-label, que gana sobre el contenido, y un alt con el mismo texto haria
+ * que un lector de pantalla anunciara el nombre dos veces.
+ *
  * Conserva el texto "Servicios" a proposito: el hero ya tiene un CTA
  * secundario "Ver servicios", y ambos son visibles a la vez en la primera
  * pantalla. Duplicar el texto reintroduciria la redundancia que este bloque
  * viene a eliminar.
  */
-import PlaceholderBox from './ui/PlaceholderBox.astro';
+import { Image } from 'astro:assets';
+import logo from '../assets/logo-imprenta-escalante.png';
 ---
 
 <header class="surface-inverse border-b border-line-hairline bg-surface-inverse h-space-7 md:h-space-9">
@@ -28,9 +35,13 @@ import PlaceholderBox from './ui/PlaceholderBox.astro';
       data-testid="logo-home-link"
       class="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
     >
-      <PlaceholderBox
-        label="[LOGO PLACEHOLDER — NO ASSET REAL]"
-        class="h-8 w-28 md:h-10 md:w-32"
+      <Image
+        src={logo}
+        alt=""
+        width={800}
+        height={165}
+        loading="eager"
+        class="h-6 w-auto md:h-8"
       />
     </a>
 

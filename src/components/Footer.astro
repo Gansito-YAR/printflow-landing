@@ -6,7 +6,8 @@
  *
  * Superficie oscura de marca: .surface-inverse redefine tinta, borde y foco.
  */
-import PlaceholderBox from './ui/PlaceholderBox.astro';
+import { Image } from 'astro:assets';
+import logo from '../assets/logo-imprenta-escalante.png';
 
 const currentYear = new Date().getFullYear();
 ---
@@ -17,7 +18,14 @@ const currentYear = new Date().getFullYear();
   <div class="mx-auto max-w-container px-space-2 md:px-space-6">
     <div class="grid grid-cols-1 gap-space-4 md:grid-cols-4 md:gap-space-3">
       <div>
-        <PlaceholderBox label="[LOGO PLACEHOLDER — NO ASSET REAL]" class="h-10 w-32" />
+        <Image
+          src={logo}
+          alt="Imprenta Escalante"
+          width={800}
+          height={165}
+          loading="lazy"
+          class="h-8 w-auto"
+        />
       </div>
 
       <div>
