@@ -1,0 +1,180 @@
+# Auditoría Fase 2.5 — Cierre de Fase 2
+
+| Campo | Detalle |
+|---|---|
+| Repositorio | `printflow-landing` |
+| Rama | `fase2.5/cierre-fase2` |
+| Origen | `Fase2.5_FARIDE_Cierre_Fase2.md` — 3 bloques |
+| Método | Código fuente, build ejecutado, medición en navegador |
+
+---
+
+## 1 · Veredicto ejecutivo
+
+**Bloque 2: completo. Bloque 1: completo salvo el deploy. Bloque 3: bloqueado con evidencia.**
+
+El Bloque 2 se cerró entero: la página bajó de 7 CTA de WhatsApp a 4, sin tocar estructura, copy ni `data-testid`. El Bloque 1 se cerró en todo lo que es código y documentación —decisión de Node registrada, tipografías autohospedadas—, pero **el deploy y el Lighthouse quedan pendientes porque requieren acceso a la cuenta de hosting**, que no es algo que un asistente pueda hacer en nombre de nadie.
+
+El Bloque 3 es el que importa comentar, porque la corrección de este documento era justamente *"pregunta antes de declararlo bloqueado"*. Se intentó. El resultado está en §4.
+
+---
+
+## 2 · Bloque 1 — Deploy y entorno
+
+| Ítem | Estado | Evidencia |
+|---|---|---|
+| 1.1 · Decisión de Node registrada | ✅ | `AGENTS.md` decía "Node 20"; ahora dice Node 22 con la razón. El README pasó de "pendiente de decisión" a decisión tomada, con la nota de fijar `NODE_VERSION` en el hosting |
+| 1.1 · `engines.node` sin tocar | ✅ | `package.json` conserva `">=22.12.0"` |
+| 1.2 · Deploy en preview público | ⛔ **Tuyo** | Requiere autenticarse en Cloudflare/Vercel y crear el proyecto |
+| 1.2 · Variables en el panel del hosting | ⛔ **Tuyo** | Depende del deploy |
+| 1.2 · `noindex` conservado | ✅ | `BaseLayout.astro` lo mantiene; sigue anotado en las tareas de lanzamiento del README |
+| 1.3 · Tipografías autohospedadas | ✅ | `@fontsource/anton` + `@fontsource/barlow`, subconjunto latin. **Cero referencias a `googleapis` o `gstatic`** en el HTML construido |
+| 1.4 · Lighthouse línea base | ⛔ **Bloqueado** | Necesita la URL pública del 1.2 |
+
+### Sobre las tipografías
+
+Se cargan tres archivos woff2 en lugar de dos conexiones a Google: Anton 400, Barlow 400 y Barlow 600.
+
+**Barlow 700 se descartó.** `document.fonts` lo reportaba como `unloaded` y una búsqueda de `font-bold` en `src/` no devuelve nada: ningún componente lo usa. Eran 22 KB de bundle que nunca se iban a descargar.
+
+`dist` completo queda en **164 KB**.
+
+### ⚠️ Vulnerabilidades de dependencias
+
+`npm audit` reporta **5 vulnerabilidades: 1 crítica, 3 altas, 1 moderada**, en `sharp`, `svgo` y `js-yaml`. Son dependencias **transitivas de Astro**, no de los paquetes de tipografía que se agregaron.
+
+**No se corrieron `npm audit fix` ni `--force`**: moverían versiones dentro de un stack que Isaías acaba de congelar en Astro 7. **Decisión suya.**
+
+---
+
+## 3 · Bloque 2 — Jerarquía de llamadas a la acción
+
+### Decisiones tomadas y por qué
+
+**CTA del header → se retira.**
+
+El documento daba tres salidas: convertirlo en "Ver servicios", quitarlo, o bajarlo a tratamiento secundario. Se eligió **quitarlo y dejar el enlace "Servicios" que ya existía como única acción del header**, mostrándolo también en móvil, donde estaba oculto tras `md:inline-flex` y el header no ofrecía ninguna navegación.
+
+**No se usó el texto "Ver servicios"** que sugería el documento. El hero ya tiene un CTA secundario con ese texto exacto y ambos son visibles en la primera pantalla: habría reintroducido la duplicación que el bloque viene a eliminar. El header conserva "Servicios".
+
+**CTA de trust → se retira.**
+
+Las dos opciones del documento eran válidas. Se eligió quitarlo por tres razones:
+
+1. Está a menos de 200 px del FAB, que hace exactamente lo mismo.
+2. Era el cuarto "Cotización general" de la página.
+3. La variante de cambiarle el mensaje —*"Tengo dudas sobre el anticipo"*— es buena idea, pero dejaría **5 CTA inline**, y el checklist exige 4.
+
+> **Nota sobre el conteo (§2.2).** La tabla del documento conserva hero + 3 tarjetas + FAB, que suman **5**, mientras el checklist pide **4**. Las dos cifras solo cuadran si el FAB no cuenta como CTA inline. Se resolvió bajo esa lectura: **4 CTA inline + el FAB flotante**. Si la intención era otra, es ajuste de una línea.
+
+**Tipo `Placement` → sin cambios.**
+
+El §2.3 se cierra solo: al desaparecer el CTA del header, ya no hay dos enlaces reportando `placement=hero`. No se amplió el tipo con `'header'`. El valor `'trust'` queda en la unión sin uso; se dejó a propósito para no estrechar el contrato del deep link, que el §3 congela.
+
+### ✅ Verificación de cierre — Bloque 2
+
+- [x] **4 CTA de WhatsApp**, no 7 — `cta-hero-whatsapp`, `cta-card-gran-formato`, `cta-card-papeleria`, `cta-card-promocionales`, más el FAB
+- [x] No hay dos CTA con el mismo texto visibles a la vez *(ver salvedad abajo)*
+- [x] Cada CTA tiene su `placement` correcto — `hero`, `catalog` ×3, `fab`
+- [x] Los tres CTA de tarjeta conservan su `service_id` — `gran-formato`, `papeleria`, `promocionales`
+- [x] Decisiones documentadas arriba
+- [x] Los `data-testid` conservados **no cambiaron** — inventario completo verificado en el DOM construido
+- [x] Estado *Disabled* funcionando: con la variable vacía, **0 enlaces `wa.me`, 4 CTA en "Contacto no disponible", FAB sin nodo en el body**
+- [x] Los enlaces siguen siendo `<a href>` reales con `target` y `rel` en el HTML estático, así que funcionan con JavaScript desactivado
+
+> **Salvedad honesta.** El tooltip del FAB dice "Cotizar por WhatsApp", igual que el CTA del hero. Está en `opacity-0` hasta el hover y el contenido visible del FAB es el icono, así que nunca se leen dos textos iguales a la vez. **No se cambió** porque debe coincidir con el `aria-label`, que la §8.3.2 de Fase 1 congela.
+
+---
+
+## 4 · Bloque 3 — Assets: se intentó, y hasta dónde se llegó
+
+**La página de Facebook es pública y se pudo abrir sin cuenta.** Esto es lo que hay:
+
+| Recurso | Disponible sin login |
+|---|---|
+| Portada / banner | **960×422 PNG**, 500 KB — descargada y revisada |
+| Una publicación | 500×600 JPG |
+| Galería de fotos | **8 miniaturas de 206×206**, con muro de login detrás |
+| Fotos a resolución completa | ❌ `/photo.php?fbid=…` redirige a `/login/?next=…` |
+
+**No se inició sesión en Facebook.** Entrar credenciales en un servicio externo queda fuera de lo que un asistente debe hacer, y no cambia el diagnóstico: haría falta tu cuenta.
+
+### Por qué eso no alcanza
+
+| Necesidad | Fuente disponible | Veredicto |
+|---|---|---|
+| Logo header/footer | Wordmark incrustado en el banner de 960×422, sobre textura | ❌ Recortarlo da un logo de baja resolución con el fondo pegado. El **§3.3 lo prohíbe expresamente**: *"no lo uses así ni intentes repararlo a mano: pídele a Andri el archivo original, idealmente vectorial"* |
+| Imagen del hero | 500×600, o miniaturas de 206×206 | ❌ Insuficiente |
+| 3 tarjetas en 4:3 | Miniaturas de 206×206 | ❌ No se puede recortar a 4:3 usable |
+| `og:image` 1200×630 | Derivada de las anteriores | ❌ Bloqueada en cascada |
+| Favicon | Derivado del logo | ❌ Bloqueado en cascada |
+
+El §3.2 pide priorizar **fotos de trabajos reales terminados**. La única publicación visible está etiquetada por Facebook como **"Contenido de IA"**, así que tampoco cumpliría ese criterio.
+
+**Lo que hace falta, concreto:** el archivo vectorial del logo (`.svg`, `.ai` o `.pdf`) y las fotos de trabajos a resolución original. Cualquiera de las dos vías sirve — que Andri los mande, o que alguien con sesión en Facebook descargue los originales de la galería.
+
+### Tres discrepancias encontradas de paso
+
+Salieron al revisar la página y **ninguna se aplicó al sitio**, porque son datos de negocio y corresponden a Andri:
+
+1. **Dos teléfonos distintos.** El banner dice `9999601378`; la ficha de Información dice `999 138 9419`. Hay que saber cuál es el bueno antes de cargar `PUBLIC_WHATSAPP_E164`.
+2. **Otra marca en el correo.** `printerbrothersoficial@gmail.com` — "Printer Brothers", no "Imprenta Escalante".
+3. **Dirección publicada.** `Av Cupules 81, entre 18 y 20, Mérida`. El footer sigue con el texto neutro *"Consulta nuestra ubicación por WhatsApp"*; **no se reemplazó** porque el Bloque 3 es de imágenes y logos, y los datos de negocio los confirma Andri.
+
+### ✅ Verificación de cierre — Bloque 3
+
+- [x] **§3.6 · El logo no se desborda del header en 320 ni 375 px** — ver abajo
+- [x] Cero scripts, píxeles o recursos externos de Facebook — verificado: 0 coincidencias de `facebook` o `fbcdn` en el HTML construido
+- [ ] Todo lo demás — bloqueado por assets
+
+### §3.6 · Desbordamiento del logo — corregido
+
+Reproducido tal cual lo describía el documento: a **320 px**, el label medía **94×67** dentro de una caja de **112×32**, desbordando 18 px la caja y **5 px el header**. Igual a 375 px.
+
+**Corregido con `overflow-hidden` en `PlaceholderBox`**, no acortando el texto. La razón importa: el documento pedía confirmar si el logo real también desbordaría. Arreglándolo en la caja, **no puede**, sea cual sea el asset que entre.
+
+Verificado en navegador a 320 y 375 px: `overflow: hidden` aplicado, la caja queda **12 px dentro del header** y nada pinta fuera de él.
+
+---
+
+## 5 · Auditoría de código
+
+```
+npm run build                     → exit 0, sin errores ni warnings de TypeScript
+grep 'style='  en src/            → 0 resultados
+grep hex/rgb/hsl en componentes   → 0 resultados
+grep '--brand-' en componentes    → 0 resultados
+grep console.log|TODO|FIXME       → 0 resultados
+grep fetch|XHR|axios|supabase     → 0 resultados
+grep '<form'|'<input'             → 0 resultados
+grep [0-9]{10,15} en src/         → 0 resultados
+grep googleapis|gstatic en dist   → 0 resultados
+grep facebook|fbcdn en dist       → 0 resultados
+peso de dist                      → 164 KB
+```
+
+**Contraste: 0 fallos.** Re-medidos todos los nodos de texto de la página contra su fondo real, con el umbral ajustado por tamaño y peso. Ninguno baja de AA.
+
+---
+
+## 6 · Pendiente
+
+### Tuyo — requiere tu cuenta
+
+1. **Deploy** en Cloudflare Pages o Vercel. Build `npm run build`, salida `dist`.
+2. **Variables en el panel:** `PUBLIC_WHATSAPP_E164` vacía, `PUBLIC_SITE_URL` con la URL del preview.
+3. **Fijar Node 22** en el hosting (`NODE_VERSION` en Cloudflare, selector de runtime en Vercel).
+4. **Lighthouse móvil** sobre la URL pública, como línea base.
+5. **Agregar `PUBLIC_SITE_URL=` a `.env.example`.** El archivo está protegido por una regla de permisos del entorno y no se pudo editar; la variable está documentada en el README.
+
+### De Andri
+
+Logo vectorial · fotos de trabajos a resolución original · el teléfono correcto de los dos · confirmar si la dirección publicada va al footer · aviso de privacidad y términos.
+
+### De Isaías
+
+El conteo de 4 vs 5 CTA del §2.2 · qué hacer con las 5 vulnerabilidades de dependencias transitivas de Astro.
+
+### Sigue sin verificarse
+
+Recorrido con `Tab`, zoom 200 %, carga con JavaScript desactivado y prueba en celular real. Son manuales y necesitan un navegador de verdad.
