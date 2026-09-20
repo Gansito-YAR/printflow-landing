@@ -1,4 +1,6 @@
 import granFormatoImg from '../assets/gran-formato-microperforado.jpg';
+import papeleriaImg from '../assets/papeleria-talonarios-folders.jpg';
+import promocionalesImg from '../assets/promocionales-playera-termo.jpg';
 
 export type ServiceId = 'gran-formato' | 'papeleria' | 'promocionales';
 
@@ -30,10 +32,16 @@ export const SERVICES: readonly Service[] = [
     id: 'papeleria',
     label: 'Papelería comercial',
     description: 'Tarjetas de presentación, flyers y folletos para tu negocio.',
+    image: papeleriaImg,
+    imageAlt:
+      'Talonarios de notas, folders tamaño carta y un folleto impresos, listos para entrega',
   },
   {
     id: 'promocionales',
     label: 'Promocionales',
     description: 'Artículos publicitarios para menudeo y mayoreo con tu marca.',
+    image: promocionalesImg,
+    imageAlt:
+      'Playera y termo deportivo personalizados con el logotipo de Imprenta Escalante',
   },
 ] as const;
