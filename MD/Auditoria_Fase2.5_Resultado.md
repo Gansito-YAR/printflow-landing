@@ -250,6 +250,51 @@ esas dos categorías que sea legal y publicable.
 - [x] Favicon real
 - [x] **El logo no se desborda del header en 320 ni 375 px** — mide 116×24 con 17 px de holgura
 - [x] Contraste: **0 fallos**, re-medido con las imágenes ya integradas
-- [ ] **Cero placeholders** — quedan 2 (Papelería y Promocionales)
+- [x] **Cero placeholders** — ver §8
 - [ ] Red lenta simulada — requiere navegador real
 - [ ] Lighthouse — requiere el deploy
+
+---
+
+## 8 · Cierre de Papelería y Promocionales
+
+Las dos tarjetas que faltaban ya tienen foto. `grep PLACEHOLDER` sobre
+`dist/index.html` devuelve **0**.
+
+Ambas salen del **banner de portada de la imprenta**, que es material propio:
+
+| Tarjeta | Contenido | Origen |
+|---|---|---|
+| Papelería comercial | Talonarios de notas, folders tamaño carta y un folleto | Recorte del banner, escalado con `lanczos3` y realzado |
+| Promocionales | Playera y termo deportivo con el logotipo de la imprenta | Íd. |
+
+### Dos imágenes propuestas que se descartaron
+
+**Talonario de clínica dental.** Muestra nombre completo, cédula profesional,
+teléfono, correo y dirección de una tercera persona — regla **G-06**. Además su
+texto está degenerado (`Paclente`, `UNIVERSIDAD AUTONOMA DE YOCATAN`,
+`Traccionamentzros Reroes`, `dentariameindatogmail.com`), señal de mockup
+generado y no de trabajo impreso real: de cerca se lee falso.
+
+**Placa de imanes publicitarios.** Publica un precio (`$580`), prohibido por
+**C-14**. Y las piezas llevan marcas y teléfonos **chilenos** (`+569 8613 44813`,
+`abastible`, precios en pesos chilenos `2 X 15.990`): son plantillas de stock,
+que el §3.3 excluye — *"solo material de la propia imprenta"*.
+
+### Estado final de assets
+
+- **6 imágenes**, todas con nombre accesible. 2 `eager` (logo del header y hero),
+  4 `lazy`.
+- **348 KB de primera carga**; imagen más pesada **60 KB**.
+- **Contraste: 0 fallos**, re-medido con las cinco fotos integradas.
+- Los tres CTA de tarjeta quedaron con la **misma altura** en 375, 800, 1024,
+  1280 y 1920 px.
+
+### Lo que sigue conviniendo pedirle a Andri
+
+El **logo vectorial** (`.svg`, `.ai` o `.pdf`). El PNG actual se extrajo por
+luminancia del material y conserva algo de textura del fondo. Sirve para
+presentar al cliente, pero el §3.3 pide el original y tiene razón.
+
+Y, si existen, **fotos sueltas de trabajos terminados**: las de Papelería y
+Promocionales son recortes de un banner, no fotografías propias de cada pieza.
