@@ -6,7 +6,9 @@ Sitio 100% estático. Su única conversión es abrir WhatsApp con un mensaje pre
 Mitiga la pérdida del 20-30% de cotizaciones por respuesta lenta del dueño.
 
 ## Stack
-Astro + Tailwind CSS + TypeScript. Node 20. Deploy estático (Cloudflare Pages / Vercel).
+Astro 7 + Tailwind CSS 4 + TypeScript. **Node 22** (decisión tomada en Fase 2.5:
+Astro 7.2.2 declara engines.node >=22.12.0, así que Node 20 no es viable).
+Deploy estático (Cloudflare Pages / Vercel) con redeploy automático.
 
 ## Fase actual: Fase 2 — identidad visual
 La estructura ya está construida y aprobada. Esta fase agrega color de marca,
