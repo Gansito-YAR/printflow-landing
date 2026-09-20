@@ -3,12 +3,12 @@
  * Seccion de confianza (spec §8.5): politica de anticipos + proceso de 3
  * pasos + CTA final. Prohibido agregar sellos, testimonios, logos de
  * clientes o certificaciones — no existen en las fuentes.
+ *
+ * Fase 2.5 §2.2 — Se retiro el CTA final de esta seccion. Quedaba a menos de
+ * 200px del FAB flotante, mandaba el mismo mensaje generico y era el cuarto
+ * "Cotizacion general" de la pagina. El FAB cubre esa zona.
  */
 import ProcessSteps from './ProcessSteps.astro';
-import Button from './ui/Button.astro';
-import { buildWhatsappHref } from '../lib/whatsapp';
-
-const href = buildWhatsappHref('Cotización general', 'general', 'trust');
 ---
 
 <section
@@ -28,16 +28,5 @@ const href = buildWhatsappHref('Cotización general', 'general', 'trust');
 
   <div class="mt-space-6">
     <ProcessSteps />
-  </div>
-
-  <div class="mt-space-4 flex justify-center md:justify-start">
-    <Button
-      variant="primary"
-      href={href}
-      label="Iniciar cotización por WhatsApp"
-      testId="cta-trust-whatsapp"
-      isWhatsapp
-      fullWidthMobile
-    />
   </div>
 </section>

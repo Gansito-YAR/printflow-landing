@@ -3,12 +3,19 @@
  * Header publico (spec §8.1). Alturas 56px movil / 72px escritorio — NO TOCAR.
  * Superficie oscura de marca: la clase .surface-inverse redefine los tokens
  * de tinta, borde y foco para que todo lo de adentro siga cumpliendo AA.
+ *
+ * Fase 2.5 §2.2 — El CTA de WhatsApp del header se retiro. Competia con el
+ * del hero: mismo texto, mismo naranja y ambos visibles en la misma pantalla,
+ * lo que aplanaba la jerarquia. El enlace "Servicios" queda como la unica
+ * accion del header y ahora se muestra tambien en movil, donde antes estaba
+ * oculto y el header no ofrecia ninguna via de navegacion.
+ *
+ * Conserva el texto "Servicios" a proposito: el hero ya tiene un CTA
+ * secundario "Ver servicios", y ambos son visibles a la vez en la primera
+ * pantalla. Duplicar el texto reintroduciria la redundancia que este bloque
+ * viene a eliminar.
  */
 import PlaceholderBox from './ui/PlaceholderBox.astro';
-import Button from './ui/Button.astro';
-import { buildWhatsappHref } from '../lib/whatsapp';
-
-const href = buildWhatsappHref('Cotización general', 'general', 'hero');
 ---
 
 <header class="surface-inverse border-b border-line-hairline bg-surface-inverse h-space-7 md:h-space-9">
@@ -31,17 +38,10 @@ const href = buildWhatsappHref('Cotización general', 'general', 'hero');
       <a
         href="#servicios"
         data-testid="nav-servicios"
-        class="hidden text-small font-semibold text-ink-inverse underline-offset-4 transition-colors duration-fast hover:underline md:inline-flex"
+        class="inline-flex items-center rounded-sm text-small font-semibold text-ink-inverse underline-offset-4 transition-colors duration-fast hover:underline"
       >
         Servicios
       </a>
-      <Button
-        variant="primary"
-        href={href}
-        label="Cotizar por WhatsApp"
-        testId="cta-header-whatsapp"
-        isWhatsapp
-      />
     </nav>
   </div>
 </header>
