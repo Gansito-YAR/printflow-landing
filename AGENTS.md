@@ -71,3 +71,47 @@ Si una decisión visual exige cambiar la estructura, detenerse y preguntar.
     confirmar que hace lo que debía. Si algo quedó mal, incompleto o inesperado,
     corregirlo en ese momento, no dejarlo como pendiente.
 27. Nunca entregar la carpeta dist/. Siempre el repositorio con un Pull Request.
+
+---
+
+## Fase 2.5 — Cierre de Fase 2
+
+Tres bloques secuenciales: 1) deploy y entorno, 2) jerarquía de CTA, 3) assets.
+No saltarse el orden: reducir los CTA cambia el layout de tres secciones, y
+hacerlo después de meter imágenes obliga a reacomodar dos veces.
+
+## Decisiones tomadas
+- Stack: Astro 7 con Node 22 (NO Node 20; Astro 7.2.2 exige >=22.12.0).
+- El sitio se despliega en Cloudflare Pages o Vercel con redeploy automático.
+- PUBLIC_WHATSAPP_E164 se queda VACÍA hasta que Andri entregue el número.
+  El estado Disabled es el comportamiento correcto, no un bug.
+- El meta robots noindex SE CONSERVA hasta que el cliente apruebe.
+- Las tipografías están autohospedadas con @fontsource (subconjunto latin,
+  solo Anton 400 y Barlow 400/600). No volver a cargarlas desde Google Fonts.
+
+## Bloque 2 — CTA
+La página debe quedar con 4 CTA de WhatsApp, no 7: hero, tres tarjetas y FAB.
+El del header pasa a ser "Ver servicios" (ancla interna) o se le da tratamiento
+secundario. El de trust se quita o cambia de mensaje para no ser redundante.
+Ampliar el tipo Placement en src/lib/whatsapp.ts para incluir 'header' si el
+CTA del header sobrevive como enlace a WhatsApp.
+Nunca dos CTA con el mismo texto visibles al mismo tiempo.
+
+## Bloque 3 — Assets
+Los assets salen de la página de Facebook del cliente que indicó Isaías.
+Se DESCARGAN a src/assets/. Prohibido enlazar, embeber o cargar cualquier cosa
+desde Facebook, y prohibido incluir sus scripts o píxeles de seguimiento.
+Se pueden editar y recortar; NUNCA deformar. Las tarjetas van en 4:3 con
+object-fit: cover.
+Todas las imágenes por astro:assets con <Image />, width y height explícitos.
+Hero: eager + fetchpriority="high". El resto: lazy.
+alt descriptivo y específico, nunca genérico.
+Máximo 200 KB por imagen; página completa bajo 1 MB.
+El logo debe funcionar sobre el header y el footer oscuros.
+og:image de 1200x630 pasada como ogImage a BaseLayout.
+
+## Verificación
+Al cerrar cada bloque: abrir el sitio, recorrerlo y confirmar. Correr el prompt
+de auditoría (Prompt_Auditoria_FARIDE.md) y adjuntar el reporte en el PR.
+El contraste debe seguir en CERO fallos: el texto sobre imagen es donde más
+se falla, así que hay que volver a medirlo después del Bloque 3.
