@@ -48,14 +48,23 @@ const href = buildWhatsappHref(service.label, service.id, 'catalog');
     {service.description}
   </p>
 
-  <div class="mt-space-3">
+  {/* mt-auto ancla el boton al fondo: las tarjetas de una fila se estiran a
+      la misma altura, asi que los tres CTA quedan alineados aunque las
+      descripciones ocupen distinto. El ancho completo les da el mismo tamano.
+
+      Entre md y lg las tres columnas dejan el boton en ~164px y "Cotizar
+      Papeleria comercial" necesita ~222px, asi que parte en dos lineas y ese
+      CTA quedaba mas alto que los otros dos. En ese rango los tres reservan
+      el alto de dos lineas; desde xl la etiqueta entra en una y vuelven a 48px.
+      El corte va en xl y no en lg porque a 1024px todavia parte (medido: 54px). */}
+  <div class="mt-auto pt-space-3">
     <Button
       variant="primary"
       href={href}
       label={`Cotizar ${service.label}`}
       testId={`cta-card-${service.id}`}
       isWhatsapp
-      fullWidthMobile
+      class="w-full md:min-h-20 xl:min-h-12"
     />
   </div>
 </article>

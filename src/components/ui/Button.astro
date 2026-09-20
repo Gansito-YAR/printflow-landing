@@ -41,7 +41,10 @@ const {
 
 const isDisabled = href === null;
 
-const heightClass = size === 'lg' ? 'h-space-7' : 'h-12'; // 56px | 48px
+// Alto MINIMO, no fijo: con un alto fijo, una etiqueta larga que parte en dos
+// lineas se desborda de la caja ("Cotizar Papeleria comercial" lo hacia en
+// columnas angostas). Asi el boton crece en vez de romperse.
+const heightClass = size === 'lg' ? 'min-h-space-7' : 'min-h-12'; // 56px | 48px
 const widthClass = fullWidthMobile ? 'w-full md:w-auto' : '';
 const wideClass = wideDesktop ? 'md:min-w-[240px]' : '';
 
