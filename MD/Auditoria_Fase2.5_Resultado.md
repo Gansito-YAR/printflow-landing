@@ -11,7 +11,13 @@
 
 ## 1 · Veredicto ejecutivo
 
-**Bloque 2: completo. Bloque 1: completo salvo el deploy. Bloque 3: bloqueado con evidencia.**
+**Bloque 2: completo. Bloque 1: completo salvo el deploy. Bloque 3: parcial — logo, hero, favicon y vista previa social integrados; faltan 2 de 3 fotos de tarjeta.**
+
+> **Nota de lectura.** Los §2 a §6 son la primera pasada. El **§4 quedó
+> superado**: ahí se concluyó que las fotos solo existían como miniaturas de
+> 206 px. Una segunda pasada encontró la forma de bajarlas a resolución
+> completa y sí se integraron assets. **El estado real del Bloque 3 está en el
+> §7**, al final del documento.
 
 El Bloque 2 se cerró entero: la página bajó de 7 CTA de WhatsApp a 4, sin tocar estructura, copy ni `data-testid`. El Bloque 1 se cerró en todo lo que es código y documentación —decisión de Node registrada, tipografías autohospedadas—, pero **el deploy y el Lighthouse quedan pendientes porque requieren acceso a la cuenta de hosting**, que no es algo que un asistente pueda hacer en nombre de nadie.
 
