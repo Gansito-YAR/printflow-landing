@@ -16,13 +16,14 @@ Especificaciones:
 
 ## Stack
 
-Astro 7 + Tailwind CSS 4 + TypeScript estricto. npm.
+Astro 7 + Tailwind CSS 4 + TypeScript estricto. **Node 22.** npm.
 
-> **Nota sobre Node.** La §4 de Fase 1 pide *Astro última versión estable* y
-> *Node 20 LTS*. Con Astro 7 esas dos condiciones son incompatibles: Astro
-> 7.2.2 declara `engines.node >= 22.12.0`. Hoy el proyecto corre en Node 22.
-> **Pendiente de decisión de Isaías:** conservar Astro 7 con Node 22, o bajar
-> a una versión de Astro compatible con Node 20.
+> **Decisión de Node — tomada (Fase 2.5 §1.1).** La §4 de Fase 1 pedía *Astro
+> última versión estable* y *Node 20 LTS*, dos condiciones incompatibles: Astro
+> 7.2.2 declara `engines.node >= 22.12.0`. **Isaías resolvió conservar Astro 7
+> con Node 22**, que ya es LTS. `engines.node` se queda como está, y la versión
+> del hosting debe fijarse en 22 para que coincida con el entorno local
+> (`NODE_VERSION` en Cloudflare Pages, o el selector de runtime en Vercel).
 
 ## Desarrollo
 

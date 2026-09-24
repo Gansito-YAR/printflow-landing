@@ -4,6 +4,7 @@
  * lineas y CTA "Cotizar [servicio]". El service_id sale de la allowlist
  * tipada, nunca de texto libre del DOM.
  */
+import { Image } from 'astro:assets';
 import PlaceholderBox from './ui/PlaceholderBox.astro';
 import Button from './ui/Button.astro';
 import type { Service } from '../data/services';
@@ -20,11 +21,24 @@ const href = buildWhatsappHref(service.label, service.id, 'catalog');
 <article
   class="flex flex-col rounded-md border border-line-hairline bg-surface-0 p-space-3 shadow-sm transition-shadow duration-base hover:border-line-brand hover:shadow-md"
 >
-  <PlaceholderBox
-    label="[IMAGEN SERVICIO 4:3 — PLACEHOLDER]"
-    ratio="4/3"
-    class="w-full"
-  />
+  {
+    service.image ? (
+      <Image
+        src={service.image}
+        alt={service.imageAlt ?? ''}
+        width={800}
+        height={600}
+        loading="lazy"
+        class="aspect-[4/3] w-full rounded-sm object-cover"
+      />
+    ) : (
+      <PlaceholderBox
+        label="[IMAGEN SERVICIO 4:3 — PLACEHOLDER]"
+        ratio="4/3"
+        class="w-full"
+      />
+    )
+  }
 
   <h3 class="mt-space-3 font-display text-h3 uppercase text-ink-strong">
     {service.label}
@@ -34,14 +48,23 @@ const href = buildWhatsappHref(service.label, service.id, 'catalog');
     {service.description}
   </p>
 
-  <div class="mt-space-3">
+  {/* mt-auto ancla el boton al fondo: las tarjetas de una fila se estiran a
+      la misma altura, asi que los tres CTA quedan alineados aunque las
+      descripciones ocupen distinto. El ancho completo les da el mismo tamano.
+
+      Entre md y lg las tres columnas dejan el boton en ~164px y "Cotizar
+      Papeleria comercial" necesita ~222px, asi que parte en dos lineas y ese
+      CTA quedaba mas alto que los otros dos. En ese rango los tres reservan
+      el alto de dos lineas; desde xl la etiqueta entra en una y vuelven a 48px.
+      El corte va en xl y no en lg porque a 1024px todavia parte (medido: 54px). */}
+  <div class="mt-auto pt-space-3">
     <Button
       variant="primary"
       href={href}
       label={`Cotizar ${service.label}`}
       testId={`cta-card-${service.id}`}
       isWhatsapp
-      fullWidthMobile
+      class="w-full md:min-h-20 xl:min-h-12"
     />
   </div>
 </article>

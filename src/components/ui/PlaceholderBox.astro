@@ -23,7 +23,11 @@ const ratioClass = ratio === '4/3' ? 'aspect-[4/3]' : ratio === '1/1' ? 'aspect-
   role="img"
   aria-label={label}
   class:list={[
-    'flex items-center justify-center rounded-sm border border-dashed border-line-hairline bg-surface-2 p-space-1 text-center',
+    // overflow-hidden: la caja debe contener su contenido siempre. A 320 y
+    // 375px el label del logo desbordaba 5px por debajo del header (Fase 2.5
+    // §3.6). Se corrige en la caja, no en el texto, para que el asset real
+    // tampoco pueda desbordar.
+    'flex items-center justify-center overflow-hidden rounded-sm border border-dashed border-line-hairline bg-surface-2 p-space-1 text-center',
     ratioClass,
     className,
   ]}
