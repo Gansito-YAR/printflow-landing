@@ -165,3 +165,76 @@
   --action-disabled-text: var(--neutral-300);
   --action-disabled-border: var(--neutral-700);
 }
+
+/* ========================================================================
+ * MODO OSCURO
+ *
+ * Sigue la preferencia del sistema operativo. Sin interruptor: un toggle
+ * exige JavaScript y estado persistido, y este sitio no tiene ni una cosa
+ * ni la otra.
+ *
+ * Solo se redefine la CAPA 2. Ningun componente cambia, porque ninguno
+ * menciona un color: es exactamente para esto que la capa semantica existe.
+ * Las primitivas no se tocan — el naranja de marca es el mismo en los dos
+ * modos, que es lo que mantiene la identidad.
+ * ===================================================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* --- Superficies --- */
+    --surface-0: var(--neutral-950); /* fondo de pagina */
+    --surface-1: var(--neutral-900); /* bloques */
+    --surface-2: #26262b; /* placeholders */
+    --surface-3: #33333a; /* separadores fuertes */
+    --surface-inverse: #09090b; /* header y footer: mas hundidos que la pagina */
+
+    /* --- Tinta --- */
+    --ink-strong: var(--neutral-50);
+    --ink-base: var(--neutral-200);
+    --ink-muted: #a1a1aa;
+    --ink-inverse: var(--neutral-0);
+    --ink-inverse-muted: #a1a1aa;
+    /* En claro el acento textual es brand-700 para alcanzar 4.5:1 sobre
+     * blanco. Sobre fondo oscuro ese tono se apaga, asi que sube a
+     * brand-500, que da 6.77:1. */
+    --ink-brand: var(--brand-500);
+    /* --ink-onBrand NO cambia: el naranja sigue siendo el mismo, y negro
+     * sobre naranja da 6.77:1. Blanco daria 2.76:1 y reprobaria. */
+
+    /* --- Bordes ---
+     * El hairline es decorativo, no borde de control, asi que no le aplica
+     * el 3:1. Se sube igual porque en oscuro es lo unico que separa una
+     * tarjeta del fondo. */
+    --border-hairline: #52525b;
+    --border-strong: var(--neutral-200);
+    --border-inverse: #3f3f46;
+
+    /* --- Accion deshabilitada --- */
+    --action-disabled-bg: #26262b;
+    --action-disabled-text: #a1a1aa;
+    --action-disabled-border: #71717a;
+
+    /* --- Foco ---
+     * El anillo negro del modo claro desaparece sobre fondo oscuro. */
+    --focus-ring: var(--brand-500);
+
+    /* --- Elevacion ---
+     * Las sombras negras no se ven sobre fondo oscuro. Se refuerzan para
+     * que el FAB y las tarjetas conserven su jerarquia. */
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 12px rgb(0 0 0 / 0.6);
+    --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.7);
+  }
+
+  /* El header y el footer ya eran oscuros en modo claro. En oscuro la
+   * pagina entera lo es, asi que dejan de necesitar la inversion: heredan
+   * los tokens normales y se distinguen por su propia superficie hundida. */
+  .surface-inverse {
+    --surface-1: #26262b;
+    --surface-2: #26262b;
+    --ink-strong: var(--neutral-50);
+    --ink-base: var(--neutral-200);
+    --ink-muted: #a1a1aa;
+    --border-hairline: #3f3f46;
+    --border-strong: var(--neutral-200);
+  }
+}
