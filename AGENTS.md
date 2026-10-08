@@ -31,6 +31,11 @@ Si una decisión visual exige cambiar la estructura, detenerse y preguntar.
 4. Contraste mínimo WCAG AA: 4.5:1 texto normal, 3:1 texto grande y bordes de control.
 5. El color nunca es el único portador de significado. Los estados conservan su
    etiqueta textual y su tratamiento de borde.
+5b. Hay MODO OSCURO, por `prefers-color-scheme` y sin interruptor. Vive en
+   tokens.css y redefine SOLO la capa semántica: las primitivas no cambian, así
+   que el naranja de marca es el mismo en los dos modos. Si agregas un token
+   semántico nuevo, defínelo también en el bloque oscuro, y verifica AA en los
+   dos modos, no en uno.
 
 ### Imágenes
 6. Todas las imágenes pasan por astro:assets con <Image />. Nunca <img> crudo
