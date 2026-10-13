@@ -32,6 +32,7 @@ export default {
           3: 'var(--surface-3)',
           inverse: 'var(--surface-inverse)',
           brand: 'var(--surface-brand)',
+          paper: 'var(--surface-paper)',
         },
         ink: {
           strong: 'var(--ink-strong)',
@@ -41,6 +42,8 @@ export default {
           'inverse-muted': 'var(--ink-inverse-muted)',
           brand: 'var(--ink-brand)',
           'on-brand': 'var(--ink-onBrand)',
+          'on-paper': 'var(--ink-on-paper)',
+          'on-paper-muted': 'var(--ink-on-paper-muted)',
         },
         line: {
           hairline: 'var(--border-hairline)',
@@ -79,6 +82,7 @@ export default {
       // Escala tipografica tokenizada (Fase 2 §2.4). Sin tamanos sueltos
       // por componente.
       fontSize: {
+        display: ['var(--text-display)', { lineHeight: '0.82', letterSpacing: '-0.02em' }],
         h1: ['var(--text-h1)', { lineHeight: '1.1' }],
         'h1-desktop': ['var(--text-h1-desktop)', { lineHeight: '1.05' }],
         h2: ['var(--text-h2)', { lineHeight: '1.15' }],

@@ -1,0 +1,119 @@
+---
+/**
+ * Seccion de catalogo (ancla #catalogo), con el tratamiento de la maqueta
+ * aprobada: display grande, titulos a dos lineas con la segunda en naranja,
+ * indice navegable y captions naranjas alternando con negras.
+ *
+ * El maquetado va en COLUMNAS, no en grilla, y es consecuencia directa de no
+ * recortar. Con una grilla, cada fila toma el alto de su pieza mas alta y las
+ * bajas dejan huecos: medido, hasta 280px de aire entre una pieza y la
+ * siguiente, porque las proporciones van de 0.46 a 2.90. Las columnas
+ * empaquetan apretado y cada pieza conserva su alto natural.
+ *
+ * La maqueta evita ese problema recortando (object-fit: cover sobre
+ * relaciones fijas), que es justo lo que aqui no se hace.
+ */
+import CatalogoItem from './CatalogoItem.astro';
+import CatalogoIndice from './CatalogoIndice.astro';
+import { CATALOGO, CATEGORIAS } from '../data/catalogo';
+import { SERVICES } from '../data/services';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+/** El CTA de cada categoria reutiliza la allowlist congelada de service_id. */
+const hrefDe = (servicio: (typeof CATEGORIAS)[number]['servicio']) => {
+  const s = SERVICES.find((x) => x.id === servicio);
+  return buildWhatsappHref(s?.label ?? 'Cotización general', servicio, 'catalog');
+};
+
+/** La ultima palabra va en la segunda linea, en naranja, como en la maqueta. */
+const partirTitulo = (titulo: string) => {
+  const palabras = titulo.split(' ');
+  const ultima = palabras.pop() ?? '';
+  return { inicio: palabras.join(' '), final: ultima };
+};
+
+---
+
+<section
+  id="catalogo"
+  data-testid="catalogo"
+  class="bg-surface-inverse surface-inverse py-space-8 md:py-space-10"
+>
+  <div class="mx-auto max-w-container px-space-2 md:px-space-6">
+    {/* --- Portada: titulo grande a la izquierda, hoja del indice a la derecha --- */}
+    <div class="flex flex-col gap-space-4 md:flex-row md:items-start md:justify-between">
+      <div class="min-w-0 flex-1">
+        <h2 class="font-display text-h1 uppercase leading-none text-ink-strong md:text-h1-desktop">
+          Catálogo
+        </h2>
+        {/* El ano es la pieza grafica dominante, como en la maqueta: escala
+            con el viewport para llenar el ancho disponible. */}
+        <p
+          aria-hidden="true"
+          class="font-display text-display uppercase text-ink-brand"
+        >
+          2026
+        </p>
+        <p class="mt-space-3 max-w-md text-body text-ink-base">
+          Lonas, letreros luminosos, vinil, impresión comercial y promocionales. Todo lo
+          que tu marca necesita para verse en la calle, en el mostrador y en las manos de
+          tus clientes.
+        </p>
+      </div>
+
+      <CatalogoIndice />
+    </div>
+
+    {/* --- Categorias --- */}
+    {
+      CATEGORIAS.map((categoria, indice) => {
+        const piezas = CATALOGO.filter((item) => item.categoria === categoria.id);
+        const { inicio, final } = partirTitulo(categoria.titulo);
+        const href = hrefDe(categoria.servicio);
+
+        return (
+          <div
+            id={`catalogo-${categoria.id}`}
+            data-testid={`catalogo-categoria-${categoria.id}`}
+            class="mt-space-10 scroll-mt-space-9"
+          >
+            <div class="flex flex-col gap-space-3 md:flex-row md:items-end md:justify-between">
+              <h3 class="font-display text-h2 uppercase leading-none text-ink-strong md:text-h2-desktop">
+                {inicio}
+                <br />
+                <span class="text-ink-brand">{final}</span>
+              </h3>
+              <div class="flex flex-col gap-space-2 md:items-end">
+                <p class="max-w-sm text-small text-ink-base">{categoria.resumen}</p>
+                {href && (
+                  <a
+                    href={href}
+                    data-testid={`cta-catalogo-${categoria.id}`}
+                    data-wa-link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex h-12 items-center justify-center rounded-sm border-2 border-action-primary-border bg-action-primary px-space-3 font-display text-small uppercase text-action-primary-text transition-colors duration-base hover:bg-action-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
+                    Cotizar {categoria.titulo.toLowerCase()}
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div class="mt-space-4 columns-1 gap-space-3 sm:columns-2 lg:columns-3">
+              {piezas.map((item, posicion) => (
+                <div class="mb-space-3 break-inside-avoid">
+                  <CatalogoItem
+                    item={item}
+                    oscura={(indice + posicion) % 2 === 1}
+                    eager={indice === 0 && posicion < 2}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })
+    }
+  </div>
+</section>

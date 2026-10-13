@@ -23,6 +23,7 @@
  */
 import { Image } from 'astro:assets';
 import logo from '../assets/logo-imprenta-escalante.png';
+import { CATEGORIAS } from '../data/catalogo';
 ---
 
 <header class="surface-inverse border-b border-line-hairline bg-surface-inverse h-space-7 md:h-space-9">
@@ -46,12 +47,36 @@ import logo from '../assets/logo-imprenta-escalante.png';
     </a>
 
     <nav aria-label="Navegación principal" class="flex items-center gap-space-3">
+      {/* Las cuatro categorias del catalogo, como en la maqueta aprobada.
+          Se ocultan por debajo de lg: no entran en 56px de alto y la §8.1
+          de Fase 1 prohibe el menu hamburguesa. En movil queda el enlace
+          directo a Catalogo, que lleva al indice navegable. */}
+      {
+        CATEGORIAS.map((categoria) => (
+          <a
+            href={`#catalogo-${categoria.id}`}
+            data-testid={`nav-${categoria.id}`}
+            class="hidden items-center rounded-sm text-small font-semibold text-ink-strong underline-offset-4 transition-colors duration-fast hover:text-ink-brand lg:inline-flex"
+          >
+            {categoria.titulo}
+          </a>
+        ))
+      }
       <a
-        href="#servicios"
-        data-testid="nav-servicios"
-        class="inline-flex items-center rounded-sm text-small font-semibold text-ink-inverse underline-offset-4 transition-colors duration-fast hover:underline"
+        href="#catalogo"
+        data-testid="nav-catalogo"
+        class="inline-flex items-center rounded-sm text-small font-semibold text-ink-strong underline-offset-4 transition-colors duration-fast hover:text-ink-brand lg:hidden"
       >
-        Servicios
+        Catálogo
+      </a>
+      {/* Ancla interna al CTA del hero, no un quinto enlace a WhatsApp: el
+          Bloque 2 de Fase 2.5 dejo la pagina en cuatro y asi se conserva. */}
+      <a
+        href="#inicio"
+        data-testid="nav-cotizar"
+        class="inline-flex h-10 items-center justify-center rounded-full bg-action-primary px-space-3 font-display text-small uppercase text-action-primary-text transition-colors duration-base hover:bg-action-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2"
+      >
+        Cotizar
       </a>
     </nav>
   </div>

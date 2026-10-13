@@ -47,30 +47,51 @@
 
 /* ========================================================================
  * CAPA 2 — SEMANTICAS
+ *
+ * EL TEMA BASE ES OSCURO. No es una variante por preferencia del sistema:
+ * es el tema del sitio, porque el catalogo 2026 que aprobo el cliente esta
+ * disenado sobre fondo negro y el naranja de marca solo rinde ahi.
+ *
+ * Las primitivas no cambian. El naranja es el mismo que se aprobo en la
+ * Etapa 1; lo unico que se reasigno es que token semantico apunta a cual.
  * ===================================================================== */
 :root {
   /* --- Superficies --- */
-  --surface-0: var(--neutral-0); /* fondo de pagina */
-  --surface-1: var(--neutral-100); /* tarjetas, bloques */
-  --surface-2: var(--neutral-200); /* placeholders de imagen */
-  --surface-3: var(--neutral-300); /* tramas, separadores fuertes */
-  --surface-inverse: var(--neutral-950); /* header y footer */
+  --surface-0: var(--neutral-950); /* fondo de pagina */
+  --surface-1: var(--neutral-900); /* tarjetas, bloques */
+  --surface-2: #26262b; /* placeholders de imagen */
+  --surface-3: #33333a; /* tramas, separadores fuertes */
+  --surface-inverse: #09090b; /* header y footer: mas hundidos que la pagina */
   --surface-brand: var(--brand-500); /* bloques de acento */
+  /* Papel: la hoja del indice y cualquier bloque que simule impreso. Es la
+   * unica superficie clara del sitio, y existe para que se lea como papel
+   * sobre fondo negro, no como un bloque sin tema. */
+  --surface-paper: #f6f5f2;
+  --ink-on-paper: var(--neutral-950);
+  --ink-on-paper-muted: var(--neutral-700);
+  /* Espiral metalica del indice. Tres paradas para dar volumen al anillo:
+   * brillo, cuerpo y sombra propia. */
+  --binding-light: #ffd166;
+  --binding-base: #f0a52a;
+  --binding-dark: #b56f10;
 
   /* --- Tinta --- */
-  --ink-strong: var(--neutral-900); /* titulos */
-  --ink-base: var(--neutral-700); /* cuerpo */
-  --ink-muted: var(--neutral-500); /* secundario, deshabilitado */
-  --ink-inverse: var(--neutral-0); /* texto sobre superficie oscura */
-  --ink-inverse-muted: var(--neutral-300); /* secundario sobre oscuro */
-  --ink-brand: var(--brand-700); /* acento textual sobre fondo claro */
+  --ink-strong: var(--neutral-50); /* titulos */
+  --ink-base: var(--neutral-200); /* cuerpo */
+  --ink-muted: #a1a1aa; /* secundario, deshabilitado */
+  --ink-inverse: var(--neutral-0);
+  --ink-inverse-muted: #a1a1aa;
+  /* Sobre fondo oscuro, brand-700 se apaga. brand-500 da 6.77:1. */
+  --ink-brand: var(--brand-500);
   --ink-onBrand: var(--neutral-950); /* texto sobre el naranja de marca */
 
-  /* --- Bordes --- */
-  --border-hairline: var(--neutral-300);
-  --border-strong: var(--neutral-900);
-  --border-inverse: var(--neutral-700); /* separadores sobre oscuro */
-  --border-brand: var(--brand-700);
+  /* --- Bordes ---
+   * El hairline es decorativo, no borde de control, asi que no le aplica el
+   * 3:1. Se sube igual porque es lo unico que separa una tarjeta del fondo. */
+  --border-hairline: #52525b;
+  --border-strong: var(--neutral-200);
+  --border-inverse: #3f3f46;
+  --border-brand: var(--brand-500);
 
   /* --- Accion primaria --- */
   --action-primary-bg: var(--brand-500);
@@ -82,18 +103,16 @@
   --action-secondary-text: var(--ink-brand);
   --action-secondary-border: var(--border-brand);
 
-  /* --- Accion deshabilitada --- */
-  --action-disabled-bg: var(--neutral-100);
-  --action-disabled-text: var(--neutral-500);
-  /* neutral-300 daba 1.34:1 contra el fondo deshabilitado y los bordes de
-   * control exigen 3:1 (Fase 2 §1.2.2). neutral-500 da 7.03:1 y ademas
-   * refuerza que el estado no dependa solo del tono. */
-  --action-disabled-border: var(--neutral-500);
+  /* --- Accion deshabilitada ---
+   * El borde cumple 3:1 contra su fondo, que es lo que exigen los bordes de
+   * control (Fase 2 §1.2.2), y refuerza que el estado no dependa solo del tono. */
+  --action-disabled-bg: #26262b;
+  --action-disabled-text: #a1a1aa;
+  --action-disabled-border: #71717a;
 
   /* --- Foco ---
-   * Se resuelve por token para que contraste contra su fondo. Las secciones
-   * oscuras lo sobrescriben con .surface-inverse mas abajo (Fase 2 §1.2.4). */
-  --focus-ring: var(--neutral-900);
+   * Sobre fondo oscuro un anillo negro desaparece. */
+  --focus-ring: var(--brand-500);
 
   /* --- Grid de 8 puntos (Fase 1 §6.2) — NO TOCAR --- */
   --space-1: 8px;
@@ -124,6 +143,9 @@
 
   --text-h1: 2rem; /* 32px mobile */
   --text-h1-desktop: 3.5rem; /* 56px */
+  /* Cifra protagonista: el ano del catalogo. Escala con el viewport porque
+   * su trabajo es llenar el ancho, no medir un tamano fijo. */
+  --text-display: clamp(5rem, 21vw, 17rem);
   --text-h2: 1.5rem; /* 24px */
   --text-h2-desktop: 2rem; /* 32px */
   --text-h3: 1.125rem; /* 18px */
@@ -138,7 +160,11 @@
 
   --shadow-sm: var(--shadow-raw-sm);
   --shadow-md: var(--shadow-raw-md);
-  --shadow-lg: var(--shadow-raw-lg);
+  /* Sobre fondo oscuro una sombra negra suave no se ve. Se refuerzan para
+   * que el FAB y las tarjetas conserven su jerarquia. */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.6);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.7);
 
   /* --- Movimiento (Fase 2 §4.3) --- */
   --duration-fast: 150ms;
@@ -146,22 +172,12 @@
 }
 
 /*
- * Contexto oscuro. Se aplica a header y footer. Redefine los tokens
- * semanticos de tinta, borde y foco para que TODO lo que viva dentro siga
- * cumpliendo AA sin que el componente tenga que saberlo.
+ * Superficie hundida. La usan el header y el footer. Con el tema oscuro como
+ * base ya no invierte nada: solo baja un escalon mas que la pagina para
+ * separarse de ella, y refuerza el borde interno.
  */
 .surface-inverse {
-  --ink-strong: var(--neutral-0);
-  --ink-base: var(--neutral-0);
-  --ink-muted: var(--neutral-300);
-  /* Las superficies internas tambien se invierten. Si no, un placeholder
-   * gris claro heredaria tinta clara y quedaria ilegible. */
-  --surface-1: var(--neutral-900);
-  --surface-2: var(--neutral-900);
-  --border-hairline: var(--neutral-700);
-  --border-strong: var(--neutral-0);
-  --focus-ring: var(--brand-500);
-  --action-disabled-bg: var(--neutral-900);
-  --action-disabled-text: var(--neutral-300);
-  --action-disabled-border: var(--neutral-700);
+  --surface-1: #26262b;
+  --surface-2: #26262b;
+  --border-hairline: #3f3f46;
 }

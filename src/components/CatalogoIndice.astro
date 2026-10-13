@@ -1,0 +1,95 @@
+---
+/**
+ * Indice del catalogo con forma de bloc de notas, como en la maqueta.
+ *
+ * Tres detalles que lo separan de "un recuadro claro puesto ahi":
+ *   1. La hoja va inclinada un grado y medio, asi no se lee como un bloque
+ *      alineado a la grilla sino como un objeto apoyado encima.
+ *   2. Los anillos MONTAN el borde superior del papel en vez de flotar
+ *      arriba: la mitad asoma y la otra mitad cae sobre la hoja, que es como
+ *      se ve una espiral real.
+ *   3. Cada anillo lleva un degradado de tres paradas (brillo, cuerpo,
+ *      sombra) y su propia sombra proyectada, para que tenga volumen.
+ *
+ * Todo lo decorativo va con aria-hidden: un lector de pantalla solo debe
+ * encontrar la lista de enlaces.
+ */
+import { CATEGORIAS } from '../data/catalogo';
+---
+
+<div class="indice-bloc relative w-full max-w-sm shrink-0 pt-space-2">
+  <nav
+    aria-label="Índice del catálogo"
+    data-testid="catalogo-indice"
+    class="indice-hoja relative rounded-[28px] bg-surface-paper px-space-3 pb-space-4 pt-space-6 shadow-lg"
+  >
+    {/* Espiral: seis anillos a caballo del borde superior de la hoja. */}
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-space-4 -top-space-3 flex justify-between"
+    >
+      {Array.from({ length: 6 }).map(() => <span class="indice-anillo" />)}
+    </div>
+
+    <h3
+      class="border-b-2 border-ink-on-paper pb-space-2 font-display text-h2 uppercase leading-none tracking-tight text-ink-on-paper"
+    >
+      Índice
+    </h3>
+
+    <ul class="flex flex-col">
+      {
+        CATEGORIAS.map((categoria, i) => (
+          <li class={i > 0 ? 'border-t border-ink-on-paper/25' : ''}>
+            <a
+              href={`#catalogo-${categoria.id}`}
+              data-testid={`indice-${categoria.id}`}
+              class="group flex flex-col gap-space-1 rounded-sm py-space-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              <span class="font-display text-h3 uppercase leading-none tracking-tight text-ink-on-paper group-hover:underline">
+                {categoria.titulo}
+              </span>
+              <span class="text-small leading-snug text-ink-on-paper-muted">
+                {categoria.resumen}
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</div>
+
+<style>
+  /* Grado y medio alcanza: mas que eso se lee como error de maquetado.
+     En movil NO se inclina. Rotar un bloque alto lo empuja hacia los lados:
+     medido a 320px, el margen lateral caia de 16 a 9px, y los 16 son grid de
+     8 puntos congelado en la seccion 6.2 de Fase 1. La inclinacion entra
+     desde md, donde sobra espacio para absorberla. */
+  @media (min-width: 768px) {
+    .indice-hoja {
+      rotate: 1.5deg;
+    }
+  }
+
+  .indice-anillo {
+    width: 18px;
+    height: 58px;
+    border-radius: 999px;
+    /* Degradado horizontal: brillo a la izquierda, cuerpo al centro, sombra
+       propia a la derecha. Es lo que le da cuerpo cilindrico al anillo. */
+    background: linear-gradient(
+      100deg,
+      var(--binding-dark) 0%,
+      var(--binding-base) 28%,
+      var(--binding-light) 50%,
+      var(--binding-base) 72%,
+      var(--binding-dark) 100%
+    );
+    box-shadow:
+      0 2px 4px rgb(0 0 0 / 0.55),
+      inset 0 -2px 3px rgb(0 0 0 / 0.3);
+  }
+
+  /* Reducir movimiento: la inclinacion no es movimiento, se conserva. */
+</style>
