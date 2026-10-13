@@ -4,11 +4,14 @@
  * aprobada: display grande, titulos a dos lineas con la segunda en naranja,
  * indice navegable y captions naranjas alternando con negras.
  *
- * La maqueta arma su ritmo recortando (object-fit: cover sobre relaciones
- * fijas). Aqui el ritmo sale del ancho de columna: las piezas apaisadas
- * ocupan dos columnas y las demas una, elegido por la proporcion REAL de
- * cada archivo. grid-flow-dense rellena los huecos que deja esa variacion,
- * e items-start evita que una pieza se estire para igualar a su vecina.
+ * El maquetado va en COLUMNAS, no en grilla, y es consecuencia directa de no
+ * recortar. Con una grilla, cada fila toma el alto de su pieza mas alta y las
+ * bajas dejan huecos: medido, hasta 280px de aire entre una pieza y la
+ * siguiente, porque las proporciones van de 0.46 a 2.90. Las columnas
+ * empaquetan apretado y cada pieza conserva su alto natural.
+ *
+ * La maqueta evita ese problema recortando (object-fit: cover sobre
+ * relaciones fijas), que es justo lo que aqui no se hace.
  */
 import CatalogoItem from './CatalogoItem.astro';
 import { CATALOGO, CATEGORIAS } from '../data/catalogo';
@@ -28,8 +31,6 @@ const partirTitulo = (titulo: string) => {
   return { inicio: palabras.join(' '), final: ultima };
 };
 
-/** Las piezas muy apaisadas piden el doble de ancho para respirar. */
-const esAncha = (ratio: number) => ratio >= 2;
 ---
 
 <section
@@ -119,9 +120,9 @@ const esAncha = (ratio: number) => ratio >= 2;
               </div>
             </div>
 
-            <div class="mt-space-4 grid grid-flow-dense auto-rows-auto grid-cols-1 items-start gap-space-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="mt-space-4 columns-1 gap-space-3 sm:columns-2 lg:columns-3">
               {piezas.map((item, posicion) => (
-                <div class:list={[esAncha(item.width / item.height) && 'sm:col-span-2']}>
+                <div class="mb-space-3 break-inside-avoid">
                   <CatalogoItem
                     item={item}
                     oscura={(indice + posicion) % 2 === 1}
