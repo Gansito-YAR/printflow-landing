@@ -14,6 +14,7 @@
  * relaciones fijas), que es justo lo que aqui no se hace.
  */
 import CatalogoItem from './CatalogoItem.astro';
+import CatalogoIndice from './CatalogoIndice.astro';
 import { CATALOGO, CATEGORIAS } from '../data/catalogo';
 import { SERVICES } from '../data/services';
 import { buildWhatsappHref } from '../lib/whatsapp';
@@ -39,9 +40,9 @@ const partirTitulo = (titulo: string) => {
   class="bg-surface-inverse surface-inverse py-space-8 md:py-space-10"
 >
   <div class="mx-auto max-w-container px-space-2 md:px-space-6">
-    {/* --- Portada de la seccion --- */}
-    <div class="flex flex-col gap-space-3 md:flex-row md:items-end md:justify-between">
-      <div>
+    {/* --- Portada: titulo grande a la izquierda, hoja del indice a la derecha --- */}
+    <div class="flex flex-col gap-space-4 md:flex-row md:items-start md:justify-between">
+      <div class="md:pt-space-4">
         <h2 class="font-display text-h1 uppercase leading-none text-ink-strong md:text-h1-desktop">
           Catálogo
         </h2>
@@ -51,38 +52,15 @@ const partirTitulo = (titulo: string) => {
         >
           2026
         </p>
+        <p class="mt-space-3 max-w-md text-body text-ink-base">
+          Lonas, letreros luminosos, vinil, impresión comercial y promocionales. Todo lo
+          que tu marca necesita para verse en la calle, en el mostrador y en las manos de
+          tus clientes.
+        </p>
       </div>
-      <p class="max-w-md text-body text-ink-base">
-        Lonas, letreros luminosos, vinil, impresión comercial y promocionales. Todo lo
-        que tu marca necesita para verse en la calle, en el mostrador y en las manos de
-        tus clientes.
-      </p>
-    </div>
 
-    {/* --- Indice navegable --- */}
-    <nav
-      aria-label="Índice del catálogo"
-      data-testid="catalogo-indice"
-      class="mt-space-6 grid grid-cols-1 gap-space-2 border-t-2 border-line-brand pt-space-3 sm:grid-cols-2 lg:grid-cols-4"
-    >
-      {
-        CATEGORIAS.map((categoria, i) => (
-          <a
-            href={`#catalogo-${categoria.id}`}
-            data-testid={`indice-${categoria.id}`}
-            class="group flex flex-col gap-space-1 rounded-sm border border-line-inverse p-space-2 transition-colors duration-fast hover:border-line-brand focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            <span class="font-display text-small text-ink-brand">
-              {String(i + 1).padStart(2, '0')}
-            </span>
-            <span class="font-display text-h3 uppercase leading-none text-ink-strong group-hover:text-ink-brand">
-              {categoria.titulo}
-            </span>
-            <span class="text-small text-ink-muted">{categoria.resumen}</span>
-          </a>
-        ))
-      }
-    </nav>
+      <CatalogoIndice />
+    </div>
 
     {/* --- Categorias --- */}
     {

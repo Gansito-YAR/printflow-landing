@@ -1,0 +1,58 @@
+---
+/**
+ * Indice del catalogo con forma de hoja de cuaderno, como en la maqueta
+ * aprobada: espiral arriba, papel claro sobre el fondo negro y una regla
+ * separando cada entrada.
+ *
+ * La espiral es decorativa y va con aria-hidden: un lector de pantalla solo
+ * debe encontrar la lista de enlaces, no los anillos.
+ *
+ * Es un <nav> con enlaces reales, asi que funciona sin JavaScript.
+ */
+import { CATEGORIAS } from '../data/catalogo';
+---
+
+<nav
+  aria-label="Índice del catálogo"
+  data-testid="catalogo-indice"
+  class="relative mt-space-6 w-full max-w-sm rounded-md bg-surface-paper px-space-3 pb-space-3 pt-space-4 shadow-lg"
+>
+  {/* Espiral: seis anillos asomando por el borde superior de la hoja. */}
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-space-3 -top-space-1 flex justify-between"
+  >
+    {
+      Array.from({ length: 6 }).map(() => (
+        <span class="h-space-3 w-space-1 rounded-full bg-action-primary shadow-sm" />
+      ))
+    }
+  </div>
+
+  <h3
+    class="border-b-2 border-ink-on-paper pb-space-1 font-display text-h2 uppercase leading-none text-ink-on-paper"
+  >
+    Índice
+  </h3>
+
+  <ul class="flex flex-col">
+    {
+      CATEGORIAS.map((categoria, i) => (
+        <li class={i > 0 ? 'border-t border-ink-on-paper-muted/30' : ''}>
+          <a
+            href={`#catalogo-${categoria.id}`}
+            data-testid={`indice-${categoria.id}`}
+            class="group flex flex-col gap-space-1 rounded-sm py-space-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <span class="font-display text-h3 uppercase leading-none text-ink-on-paper group-hover:underline">
+              {categoria.titulo}
+            </span>
+            <span class="text-small leading-snug text-ink-on-paper-muted">
+              {categoria.resumen}
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

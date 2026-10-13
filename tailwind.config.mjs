@@ -32,6 +32,7 @@ export default {
           3: 'var(--surface-3)',
           inverse: 'var(--surface-inverse)',
           brand: 'var(--surface-brand)',
+          paper: 'var(--surface-paper)',
         },
         ink: {
           strong: 'var(--ink-strong)',
@@ -41,6 +42,8 @@ export default {
           'inverse-muted': 'var(--ink-inverse-muted)',
           brand: 'var(--ink-brand)',
           'on-brand': 'var(--ink-onBrand)',
+          'on-paper': 'var(--ink-on-paper)',
+          'on-paper-muted': 'var(--ink-on-paper-muted)',
         },
         line: {
           hairline: 'var(--border-hairline)',

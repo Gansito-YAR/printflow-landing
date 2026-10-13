@@ -63,6 +63,12 @@
   --surface-3: #33333a; /* tramas, separadores fuertes */
   --surface-inverse: #09090b; /* header y footer: mas hundidos que la pagina */
   --surface-brand: var(--brand-500); /* bloques de acento */
+  /* Papel: la hoja del indice y cualquier bloque que simule impreso. Es la
+   * unica superficie clara del sitio, y existe para que se lea como papel
+   * sobre fondo negro, no como un bloque sin tema. */
+  --surface-paper: #f6f5f2;
+  --ink-on-paper: var(--neutral-950);
+  --ink-on-paper-muted: var(--neutral-700);
 
   /* --- Tinta --- */
   --ink-strong: var(--neutral-50); /* titulos */
