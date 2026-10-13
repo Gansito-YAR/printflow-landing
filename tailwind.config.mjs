@@ -82,6 +82,7 @@ export default {
       // Escala tipografica tokenizada (Fase 2 §2.4). Sin tamanos sueltos
       // por componente.
       fontSize: {
+        display: ['var(--text-display)', { lineHeight: '0.82', letterSpacing: '-0.02em' }],
         h1: ['var(--text-h1)', { lineHeight: '1.1' }],
         'h1-desktop': ['var(--text-h1-desktop)', { lineHeight: '1.05' }],
         h2: ['var(--text-h2)', { lineHeight: '1.15' }],

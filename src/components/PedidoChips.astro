@@ -136,7 +136,9 @@ const hrefGeneral = buildWhatsappHref('Cotización general', 'general', 'catalog
      con soporte real; el color transparente deja ver el fondo naranja. */
   .pedido-eco {
     color: transparent;
-    -webkit-text-stroke: 2px var(--ink-onBrand);
-    margin-top: -0.12em;
+    /* Trazo grueso: a 2px el eco se perdia contra el naranja. */
+    -webkit-text-stroke: 4px var(--ink-onBrand);
+    /* Cae por debajo del titulo en vez de encimarse, como en la maqueta. */
+    margin-top: 0.04em;
   }
 </style>

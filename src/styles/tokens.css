@@ -69,6 +69,11 @@
   --surface-paper: #f6f5f2;
   --ink-on-paper: var(--neutral-950);
   --ink-on-paper-muted: var(--neutral-700);
+  /* Espiral metalica del indice. Tres paradas para dar volumen al anillo:
+   * brillo, cuerpo y sombra propia. */
+  --binding-light: #ffd166;
+  --binding-base: #f0a52a;
+  --binding-dark: #b56f10;
 
   /* --- Tinta --- */
   --ink-strong: var(--neutral-50); /* titulos */
@@ -138,6 +143,9 @@
 
   --text-h1: 2rem; /* 32px mobile */
   --text-h1-desktop: 3.5rem; /* 56px */
+  /* Cifra protagonista: el ano del catalogo. Escala con el viewport porque
+   * su trabajo es llenar el ancho, no medir un tamano fijo. */
+  --text-display: clamp(5rem, 21vw, 17rem);
   --text-h2: 1.5rem; /* 24px */
   --text-h2-desktop: 2rem; /* 32px */
   --text-h3: 1.125rem; /* 18px */

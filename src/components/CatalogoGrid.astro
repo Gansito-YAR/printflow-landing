@@ -42,13 +42,15 @@ const partirTitulo = (titulo: string) => {
   <div class="mx-auto max-w-container px-space-2 md:px-space-6">
     {/* --- Portada: titulo grande a la izquierda, hoja del indice a la derecha --- */}
     <div class="flex flex-col gap-space-4 md:flex-row md:items-start md:justify-between">
-      <div class="md:pt-space-4">
+      <div class="min-w-0 flex-1">
         <h2 class="font-display text-h1 uppercase leading-none text-ink-strong md:text-h1-desktop">
           Catálogo
         </h2>
+        {/* El ano es la pieza grafica dominante, como en la maqueta: escala
+            con el viewport para llenar el ancho disponible. */}
         <p
           aria-hidden="true"
-          class="font-display text-h1 uppercase leading-none text-ink-brand md:text-h1-desktop"
+          class="font-display text-display uppercase text-ink-brand"
         >
           2026
         </p>
