@@ -1,16 +1,16 @@
 ---
 /**
- * Seccion de catalogo de la landing (ancla #catalogo).
+ * Seccion de catalogo (ancla #catalogo), con el tratamiento de la maqueta
+ * aprobada: display grande, titulos a dos lineas con la segunda en naranja,
+ * indice navegable y captions naranjas alternando con negras.
  *
- * Maquetado en COLUMNAS (masonry CSS), no en grilla. Es la consecuencia de no
- * recortar: con 21 imagenes de proporciones muy distintas (0.46 a 2.90), una
- * grilla de filas obliga a recortar o deja huecos enormes. Las columnas dejan
- * que cada pieza ocupe su alto natural y se acomoden sin espacio muerto.
- *
- * break-inside-avoid en cada item evita que una pieza se parta entre columnas.
+ * La maqueta arma su ritmo recortando (object-fit: cover sobre relaciones
+ * fijas). Aqui el ritmo sale del ancho de columna: las piezas apaisadas
+ * ocupan dos columnas y las demas una, elegido por la proporcion REAL de
+ * cada archivo. grid-flow-dense rellena los huecos que deja esa variacion,
+ * e items-start evita que una pieza se estire para igualar a su vecina.
  */
 import CatalogoItem from './CatalogoItem.astro';
-import Button from './ui/Button.astro';
 import { CATALOGO, CATEGORIAS } from '../data/catalogo';
 import { SERVICES } from '../data/services';
 import { buildWhatsappHref } from '../lib/whatsapp';
@@ -20,54 +20,119 @@ const hrefDe = (servicio: (typeof CATEGORIAS)[number]['servicio']) => {
   const s = SERVICES.find((x) => x.id === servicio);
   return buildWhatsappHref(s?.label ?? 'Cotización general', servicio, 'catalog');
 };
+
+/** La ultima palabra va en la segunda linea, en naranja, como en la maqueta. */
+const partirTitulo = (titulo: string) => {
+  const palabras = titulo.split(' ');
+  const ultima = palabras.pop() ?? '';
+  return { inicio: palabras.join(' '), final: ultima };
+};
+
+/** Las piezas muy apaisadas piden el doble de ancho para respirar. */
+const esAncha = (ratio: number) => ratio >= 2;
 ---
 
 <section
   id="catalogo"
   data-testid="catalogo"
-  class="mx-auto max-w-container px-space-2 py-space-6 md:px-space-6 md:py-space-8"
+  class="bg-surface-inverse surface-inverse py-space-8 md:py-space-10"
 >
-  <h2 class="font-display text-h2 uppercase text-ink-strong md:text-h2-desktop">
-    Catálogo 2026
-  </h2>
-  <p class="mt-space-1 max-w-2xl text-body text-ink-base">
-    Lonas, letreros luminosos, vinil, impresión comercial y promocionales. Todo lo que
-    tu marca necesita para verse en la calle, en el mostrador y en las manos de tus
-    clientes.
-  </p>
+  <div class="mx-auto max-w-container px-space-2 md:px-space-6">
+    {/* --- Portada de la seccion --- */}
+    <div class="flex flex-col gap-space-3 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h2 class="font-display text-h1 uppercase leading-none text-ink-strong md:text-h1-desktop">
+          Catálogo
+        </h2>
+        <p
+          aria-hidden="true"
+          class="font-display text-h1 uppercase leading-none text-ink-brand md:text-h1-desktop"
+        >
+          2026
+        </p>
+      </div>
+      <p class="max-w-md text-body text-ink-base">
+        Lonas, letreros luminosos, vinil, impresión comercial y promocionales. Todo lo
+        que tu marca necesita para verse en la calle, en el mostrador y en las manos de
+        tus clientes.
+      </p>
+    </div>
 
-  {
-    CATEGORIAS.map((categoria, indice) => {
-      const piezas = CATALOGO.filter((item) => item.categoria === categoria.id);
-      const href = hrefDe(categoria.servicio);
+    {/* --- Indice navegable --- */}
+    <nav
+      aria-label="Índice del catálogo"
+      data-testid="catalogo-indice"
+      class="mt-space-6 grid grid-cols-1 gap-space-2 border-t-2 border-line-brand pt-space-3 sm:grid-cols-2 lg:grid-cols-4"
+    >
+      {
+        CATEGORIAS.map((categoria, i) => (
+          <a
+            href={`#catalogo-${categoria.id}`}
+            data-testid={`indice-${categoria.id}`}
+            class="group flex flex-col gap-space-1 rounded-sm border border-line-inverse p-space-2 transition-colors duration-fast hover:border-line-brand focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <span class="font-display text-small text-ink-brand">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span class="font-display text-h3 uppercase leading-none text-ink-strong group-hover:text-ink-brand">
+              {categoria.titulo}
+            </span>
+            <span class="text-small text-ink-muted">{categoria.resumen}</span>
+          </a>
+        ))
+      }
+    </nav>
 
-      return (
-        <div class="mt-space-6" data-testid={`catalogo-categoria-${categoria.id}`}>
-          <div class="flex flex-col gap-space-2 border-t border-line-hairline pt-space-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h3 class="font-display text-h3 uppercase text-ink-brand">
-                {categoria.titulo}
+    {/* --- Categorias --- */}
+    {
+      CATEGORIAS.map((categoria, indice) => {
+        const piezas = CATALOGO.filter((item) => item.categoria === categoria.id);
+        const { inicio, final } = partirTitulo(categoria.titulo);
+        const href = hrefDe(categoria.servicio);
+
+        return (
+          <div
+            id={`catalogo-${categoria.id}`}
+            data-testid={`catalogo-categoria-${categoria.id}`}
+            class="mt-space-10 scroll-mt-space-9"
+          >
+            <div class="flex flex-col gap-space-3 md:flex-row md:items-end md:justify-between">
+              <h3 class="font-display text-h2 uppercase leading-none text-ink-strong md:text-h2-desktop">
+                {inicio}
+                <br />
+                <span class="text-ink-brand">{final}</span>
               </h3>
-              <p class="mt-space-1 max-w-xl text-small text-ink-base">
-                {categoria.resumen}
-              </p>
+              <div class="flex flex-col gap-space-2 md:items-end">
+                <p class="max-w-sm text-small text-ink-base">{categoria.resumen}</p>
+                {href && (
+                  <a
+                    href={href}
+                    data-testid={`cta-catalogo-${categoria.id}`}
+                    data-wa-link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex h-12 items-center justify-center rounded-sm border-2 border-action-primary-border bg-action-primary px-space-3 font-display text-small uppercase text-action-primary-text transition-colors duration-base hover:bg-action-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
+                    Cotizar {categoria.titulo.toLowerCase()}
+                  </a>
+                )}
+              </div>
             </div>
-            <Button
-              variant="secondary"
-              href={href}
-              label={`Cotizar ${categoria.titulo.toLowerCase()}`}
-              testId={`cta-catalogo-${categoria.id}`}
-              isWhatsapp
-            />
-          </div>
 
-          <div class="mt-space-3 columns-1 gap-space-3 sm:columns-2 lg:columns-3">
-            {piezas.map((item, posicion) => (
-              <CatalogoItem item={item} eager={indice === 0 && posicion < 2} />
-            ))}
+            <div class="mt-space-4 grid grid-flow-dense auto-rows-auto grid-cols-1 items-start gap-space-3 sm:grid-cols-2 lg:grid-cols-3">
+              {piezas.map((item, posicion) => (
+                <div class:list={[esAncha(item.width / item.height) && 'sm:col-span-2']}>
+                  <CatalogoItem
+                    item={item}
+                    oscura={(indice + posicion) % 2 === 1}
+                    eager={indice === 0 && posicion < 2}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      );
-    })
-  }
+        );
+      })
+    }
+  </div>
 </section>

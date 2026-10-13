@@ -1,54 +1,56 @@
 ---
 /**
- * Una pieza del catalogo.
+ * Una pieza del catalogo, con el tratamiento de la maqueta aprobada:
+ * caption solida naranja alternando con caption negra de borde naranja.
  *
  * REGLA CENTRAL: la imagen se muestra COMPLETA, nunca recortada.
  *
- * La maqueta que se le enseno al cliente usaba relaciones fijas (16/9, 3/4,
- * 21/8) con object-fit: cover, que recorta. Aqui no: cada imagen impone su
- * propia relacion con sus medidas reales, asi que el navegador reserva el
- * espacio exacto. Resultado: cero recortes, cero franjas negras y cero salto
- * de layout al cargar.
- *
- * Por eso tampoco se reutiliza ServiceCard: ese esta clavado en 4:3 con
- * object-cover.
+ * La maqueta logra su orden visual con object-fit: cover sobre relaciones
+ * fijas (16/9, 3/4, 21/8), o sea recortando: en la referencia se ve cortada
+ * la lona amarilla y "Letras de acrilico". Aqui el orden sale de otro lado:
+ * cada pieza ocupa un ancho de columna elegido segun su proporcion REAL, y
+ * dentro de ese ancho la imagen se ve entera. Mismo ritmo editorial, sin
+ * mutilar ninguna foto.
  */
 import { Image } from 'astro:assets';
 import type { ItemCatalogo } from '../data/catalogo';
 
 interface Props {
   item: ItemCatalogo;
+  /** Caption negra con borde naranja en vez de naranja solida. */
+  oscura?: boolean;
   /** Las primeras piezas visibles cargan antes; el resto se difiere. */
   eager?: boolean;
 }
 
-const { item, eager = false } = Astro.props;
+const { item, oscura = false, eager = false } = Astro.props;
 ---
 
 <figure
-  class="mb-space-3 flex break-inside-avoid flex-col overflow-hidden rounded-md border border-line-hairline bg-surface-0 shadow-sm transition-shadow duration-base hover:border-line-brand hover:shadow-md"
+  class="flex flex-col overflow-hidden rounded-md"
   data-testid={`catalogo-item-${item.id}`}
 >
-  {/*
-    widths + sizes: en tres columnas cada pieza ocupa ~430px, asi que servir
-    siempre el original de 760 manda pixeles de mas. El navegador elige el
-    archivo segun el ancho real del hueco. Las medidas siguen siendo las
-    reales, asi que la relacion de aspecto no cambia.
-  */}
   <Image
     src={item.image}
     alt={item.alt}
     width={item.width}
     height={item.height}
     widths={[320, 480, item.width]}
-    sizes="(min-width: 1024px) 420px, (min-width: 640px) 45vw, 92vw"
+    sizes="(min-width: 1024px) 560px, (min-width: 640px) 48vw, 92vw"
     loading={eager ? 'eager' : 'lazy'}
     decoding={eager ? 'sync' : 'async'}
     class="h-auto w-full"
   />
 
-  <figcaption class="flex flex-col gap-space-1 p-space-2">
-    <h3 class="font-display text-h3 uppercase text-ink-strong">{item.titulo}</h3>
-    {item.descripcion && <p class="text-small text-ink-base">{item.descripcion}</p>}
+  <figcaption
+    class:list={[
+      'flex flex-1 flex-col gap-space-1 px-space-2 py-space-2',
+      oscura
+        ? 'border-2 border-t-0 border-line-brand bg-surface-inverse text-ink-strong'
+        : 'bg-surface-brand text-ink-on-brand',
+    ]}
+  >
+    <h3 class="font-display text-h3 uppercase leading-none">{item.titulo}</h3>
+    {item.descripcion && <p class="text-small leading-snug">{item.descripcion}</p>}
   </figcaption>
 </figure>
