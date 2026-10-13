@@ -61,10 +61,15 @@ import { CATEGORIAS } from '../data/catalogo';
 </div>
 
 <style>
-  /* La inclinacion vive en el contenedor para que la sombra gire con la hoja.
-     Grado y medio alcanza: mas que eso se lee como error de maquetado. */
-  .indice-hoja {
-    rotate: 1.5deg;
+  /* Grado y medio alcanza: mas que eso se lee como error de maquetado.
+     En movil NO se inclina. Rotar un bloque alto lo empuja hacia los lados:
+     medido a 320px, el margen lateral caia de 16 a 9px, y los 16 son grid de
+     8 puntos congelado en la seccion 6.2 de Fase 1. La inclinacion entra
+     desde md, donde sobra espacio para absorberla. */
+  @media (min-width: 768px) {
+    .indice-hoja {
+      rotate: 1.5deg;
+    }
   }
 
   .indice-anillo {
