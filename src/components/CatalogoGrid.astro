@@ -1,0 +1,73 @@
+---
+/**
+ * Seccion de catalogo de la landing (ancla #catalogo).
+ *
+ * Maquetado en COLUMNAS (masonry CSS), no en grilla. Es la consecuencia de no
+ * recortar: con 21 imagenes de proporciones muy distintas (0.46 a 2.90), una
+ * grilla de filas obliga a recortar o deja huecos enormes. Las columnas dejan
+ * que cada pieza ocupe su alto natural y se acomoden sin espacio muerto.
+ *
+ * break-inside-avoid en cada item evita que una pieza se parta entre columnas.
+ */
+import CatalogoItem from './CatalogoItem.astro';
+import Button from './ui/Button.astro';
+import { CATALOGO, CATEGORIAS } from '../data/catalogo';
+import { SERVICES } from '../data/services';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+/** El CTA de cada categoria reutiliza la allowlist congelada de service_id. */
+const hrefDe = (servicio: (typeof CATEGORIAS)[number]['servicio']) => {
+  const s = SERVICES.find((x) => x.id === servicio);
+  return buildWhatsappHref(s?.label ?? 'Cotización general', servicio, 'catalog');
+};
+---
+
+<section
+  id="catalogo"
+  data-testid="catalogo"
+  class="mx-auto max-w-container px-space-2 py-space-6 md:px-space-6 md:py-space-8"
+>
+  <h2 class="font-display text-h2 uppercase text-ink-strong md:text-h2-desktop">
+    Catálogo 2026
+  </h2>
+  <p class="mt-space-1 max-w-2xl text-body text-ink-base">
+    Lonas, letreros luminosos, vinil, impresión comercial y promocionales. Todo lo que
+    tu marca necesita para verse en la calle, en el mostrador y en las manos de tus
+    clientes.
+  </p>
+
+  {
+    CATEGORIAS.map((categoria, indice) => {
+      const piezas = CATALOGO.filter((item) => item.categoria === categoria.id);
+      const href = hrefDe(categoria.servicio);
+
+      return (
+        <div class="mt-space-6" data-testid={`catalogo-categoria-${categoria.id}`}>
+          <div class="flex flex-col gap-space-2 border-t border-line-hairline pt-space-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h3 class="font-display text-h3 uppercase text-ink-brand">
+                {categoria.titulo}
+              </h3>
+              <p class="mt-space-1 max-w-xl text-small text-ink-base">
+                {categoria.resumen}
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              href={href}
+              label={`Cotizar ${categoria.titulo.toLowerCase()}`}
+              testId={`cta-catalogo-${categoria.id}`}
+              isWhatsapp
+            />
+          </div>
+
+          <div class="mt-space-3 columns-1 gap-space-3 sm:columns-2 lg:columns-3">
+            {piezas.map((item, posicion) => (
+              <CatalogoItem item={item} eager={indice === 0 && posicion < 2} />
+            ))}
+          </div>
+        </div>
+      );
+    })
+  }
+</section>
