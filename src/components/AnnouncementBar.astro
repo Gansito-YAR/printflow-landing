@@ -1,0 +1,31 @@
+---
+/**
+ * Barra de aviso editable desde el panel (business_settings.landing_announcement).
+ *
+ * Si el campo esta vacio el componente no emite NADA: ni el contenedor ni un
+ * hueco. Un aviso vacio que igual reserva alto empuja el header hacia abajo y
+ * rompe las alturas de 56 y 72px congeladas en la spec.
+ *
+ * Va arriba del header, no fijo: es informacion de contexto, no navegacion, y
+ * ocupar el tope de la pantalla de forma permanente en un celular de 812px es
+ * caro. Se lee al entrar y se va al hacer scroll.
+ *
+ * Fondo de marca con tinta oscura encima: ese par mide 6.77:1, el unico que
+ * pasa AA sobre el naranja (el blanco da 2.76:1).
+ */
+import { SETTINGS } from '../lib/settings';
+
+const aviso = SETTINGS.announcement;
+---
+
+{
+  aviso && (
+    <aside
+      data-testid="aviso"
+      aria-label="Aviso"
+      class="bg-surface-brand px-space-2 py-space-1 text-center md:px-space-6"
+    >
+      <p class="mx-auto max-w-container text-small font-semibold text-ink-on-brand">{aviso}</p>
+    </aside>
+  )
+}

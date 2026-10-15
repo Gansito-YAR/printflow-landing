@@ -36,7 +36,7 @@ const { item, oscura = false, eager = false } = Astro.props;
     width={item.width}
     height={item.height}
     widths={[320, 480, item.width]}
-    sizes="(min-width: 1024px) 560px, (min-width: 640px) 48vw, 92vw"
+    sizes="(min-width: 1024px) 560px, (min-width: 640px) 48vw, 46vw"
     loading={eager ? 'eager' : 'lazy'}
     decoding={eager ? 'sync' : 'async'}
     class="h-auto w-full"

@@ -64,6 +64,57 @@ entorno del hosting:
 PUBLIC_SITE_URL=
 ```
 
+### `SUPABASE_URL` y `SUPABASE_ANON_KEY` — el panel administrativo
+
+Con estas dos variables el sitio deja de tener datos escritos a mano y los lee
+de `business_settings`, la misma fila que edita el ADMIN en
+`printflow-Admin` → **Configuración → Página pública**.
+
+```
+SUPABASE_URL=https://<proyecto>.supabase.co
+SUPABASE_ANON_KEY=<clave publicable>
+```
+
+Van **sin** el prefijo `PUBLIC_` a propósito: así Astro no las inyecta en
+ningún bundle de cliente. La clave es la publicable (`anon`), no la
+`service_role` — esta última no debe existir en el entorno de build.
+
+Requiere la migración `20261017000001_landing_administrable.sql` aplicada. Sin
+ella `anon` no tiene `SELECT` sobre la tabla y el build falla diciéndolo.
+
+Qué administra el panel:
+
+| Campo | Dónde se ve |
+| --- | --- |
+| `landing_whatsapp_e164` | Los 36 enlaces de WhatsApp del sitio |
+| `business_name` | Logo, pie y aviso de derechos |
+| `business_phone` · `business_email` | Pie |
+| `business_address` · `landing_maps_url` | Columna «Dirección» del pie |
+| `business_hours` | Columna «Horario» del pie |
+| `deposit_pct` | «Los pedidos requieren un anticipo del N %» |
+| `landing_instagram_url` · `landing_facebook_url` | Enlaces del pie |
+| `landing_announcement` | Barra arriba del header; vacío no la dibuja |
+
+**Cuándo se ve el cambio.** En el build, no al instante. El sitio es estático y
+no consulta nada en runtime: lo exige la regla 16 (cero fetch) y, sobre todo, la
+18 (los enlaces funcionan con JavaScript desactivado) — un número traído por
+`fetch` no puede estar en el HTML servido. Para que el panel dispare la
+republicación, configura un **Database Webhook** en Supabase:
+
+```
+Tabla    public.business_settings
+Evento   UPDATE
+Tipo     HTTP Request → POST
+URL      el Deploy Hook de Cloudflare Pages o Vercel
+```
+
+La URL del hook se guarda como secreto en Supabase, nunca en el bundle del
+panel: si viajara al navegador, cualquiera podría disparar builds.
+
+Si las variables no están definidas, el sitio usa `PUBLIC_WHATSAPP_E164` y el
+resto queda con el texto neutro de siempre. El contrato anterior sigue valiendo
+tal cual en local y en CI.
+
 ## Sistema de diseño
 
 `src/styles/tokens.css` tiene **dos capas** y es el único lugar del proyecto

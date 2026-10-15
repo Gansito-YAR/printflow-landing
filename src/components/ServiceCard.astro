@@ -16,37 +16,50 @@ interface Props {
 
 const { service } = Astro.props;
 const href = buildWhatsappHref(service.label, service.id, 'catalog');
+
+/* En movil la imagen va de miniatura al costado y desde sm vuelve a ocupar
+   el ancho completo. Medido a 375px: la tarjeta vertical daba 439px de alto,
+   de los cuales 221 eran la imagen 4:3 a ancho completo; tres tarjetas se
+   comian dos pantallas enteras antes de llegar al catalogo. Con la miniatura
+   de 128px la tarjeta baja a ~216px sin perder ningun elemento de la §8.4:
+   siguen los cuatro y la relacion sigue siendo 4:3. */
+const CLASES_VISUAL = 'w-32 shrink-0 rounded-sm sm:w-full';
 ---
 
 <article
   class="flex flex-col rounded-md border border-line-hairline bg-surface-0 p-space-3 shadow-sm transition-shadow duration-base hover:border-line-brand hover:shadow-md"
 >
-  {
-    service.image ? (
-      <Image
-        src={service.image}
-        alt={service.imageAlt ?? ''}
-        width={800}
-        height={600}
-        loading="lazy"
-        class="aspect-[4/3] w-full rounded-sm object-cover"
-      />
-    ) : (
-      <PlaceholderBox
-        label="[IMAGEN SERVICIO 4:3 — PLACEHOLDER]"
-        ratio="4/3"
-        class="w-full"
-      />
-    )
-  }
+  <div class="flex gap-space-3 sm:flex-col sm:gap-0">
+    {
+      service.image ? (
+        <Image
+          src={service.image}
+          alt={service.imageAlt ?? ''}
+          width={800}
+          height={600}
+          sizes="(min-width: 768px) 33vw, 128px"
+          loading="lazy"
+          class:list={[CLASES_VISUAL, 'aspect-[4/3] object-cover']}
+        />
+      ) : (
+        <PlaceholderBox
+          label="[IMAGEN SERVICIO 4:3 — PLACEHOLDER]"
+          ratio="4/3"
+          class={CLASES_VISUAL}
+        />
+      )
+    }
 
-  <h3 class="mt-space-3 font-display text-h3 uppercase text-ink-strong">
-    {service.label}
-  </h3>
+    <div class="min-w-0 flex-1">
+      <h3 class="font-display text-h3 uppercase text-ink-strong sm:mt-space-3">
+        {service.label}
+      </h3>
 
-  <p class="mt-space-1 line-clamp-2 text-small text-ink-base">
-    {service.description}
-  </p>
+      <p class="mt-space-1 line-clamp-none text-small text-ink-base sm:line-clamp-2">
+        {service.description}
+      </p>
+    </div>
+  </div>
 
   {/* mt-auto ancla el boton al fondo: las tarjetas de una fila se estiran a
       la misma altura, asi que los tres CTA quedan alineados aunque las
