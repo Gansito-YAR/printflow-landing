@@ -5,11 +5,27 @@
  * data-wa-footer-guard: el script oculta el FAB mientras colisionen.
  *
  * Superficie oscura de marca: .surface-inverse redefine tinta, borde y foco.
+ *
+ * Direccion, horario, contacto y redes los edita el ADMIN en el panel y se
+ * hornean en el build (ver lib/settings.ts). Mientras no esten cargados se
+ * mantiene el texto neutro: no afirma nada falso y evita los corchetes
+ * visibles que prohibe Fase 2 §5.6.
  */
 import { Image } from 'astro:assets';
 import logo from '../assets/logo-imprenta-escalante.png';
+import { SETTINGS } from '../lib/settings';
 
 const currentYear = new Date().getFullYear();
+
+/* Enlaces de redes que el ADMIN haya cargado. La URL ya viene saneada desde
+   settings.ts: lo que no empiece con https:// llega como null. */
+const redes = [
+  { etiqueta: 'Instagram', href: SETTINGS.instagramUrl, testId: 'footer-link-instagram' },
+  { etiqueta: 'Facebook', href: SETTINGS.facebookUrl, testId: 'footer-link-facebook' },
+].filter((r): r is { etiqueta: string; href: string; testId: string } => r.href !== null);
+
+const claseEnlace =
+  'rounded-sm text-ink-muted underline-offset-4 transition-colors duration-fast hover:text-ink-inverse hover:underline';
 ---
 
 <footer
@@ -20,49 +36,80 @@ const currentYear = new Date().getFullYear();
       <div>
         <Image
           src={logo}
-          alt="Imprenta Escalante"
+          alt={SETTINGS.businessName}
           width={800}
           height={165}
           loading="lazy"
           class="h-8 w-auto"
         />
+        {
+          SETTINGS.phone && (
+            <p class="mt-space-2 text-small text-ink-muted" data-testid="footer-telefono">
+              {SETTINGS.phone}
+            </p>
+          )
+        }
+        {
+          SETTINGS.email && (
+            <p class="mt-space-1 text-small text-ink-muted" data-testid="footer-correo">
+              {SETTINGS.email}
+            </p>
+          )
+        }
       </div>
 
       <div>
         <h3 class="font-display text-h3 uppercase text-ink-inverse">Dirección</h3>
-        {/* Dato real pendiente de Andri. Texto neutro que no afirma nada
-            falso, en lugar de corchetes visibles (Fase 2 §5.6). */}
-        <p class="mt-space-1 text-small text-ink-muted">
-          Consulta nuestra ubicación por WhatsApp.
+        <p class="mt-space-1 text-small text-ink-muted" data-testid="footer-direccion">
+          {SETTINGS.address ?? 'Consulta nuestra ubicación por WhatsApp.'}
         </p>
+        {
+          SETTINGS.mapsUrl && (
+            <a
+              href={SETTINGS.mapsUrl}
+              data-testid="footer-link-mapa"
+              target="_blank"
+              rel="noopener noreferrer"
+              class:list={['mt-space-1 inline-block text-small', claseEnlace]}
+            >
+              Ver en el mapa
+            </a>
+          )
+        }
       </div>
 
       <div>
         <h3 class="font-display text-h3 uppercase text-ink-inverse">Horario</h3>
-        {/* Dato real pendiente de Andri. */}
-        <p class="mt-space-1 text-small text-ink-muted">
-          Consulta nuestro horario de atención por WhatsApp.
+        <p class="mt-space-1 text-small text-ink-muted" data-testid="footer-horario">
+          {SETTINGS.hours ?? 'Consulta nuestro horario de atención por WhatsApp.'}
         </p>
       </div>
 
       <div>
         <h3 class="font-display text-h3 uppercase text-ink-inverse">Enlaces</h3>
         <ul class="mt-space-1 flex flex-col gap-space-1 text-small">
+          {
+            redes.map((red) => (
+              <li>
+                <a
+                  href={red.href}
+                  data-testid={red.testId}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={claseEnlace}
+                >
+                  {red.etiqueta}
+                </a>
+              </li>
+            ))
+          }
           <li>
-            <a
-              href="#"
-              data-testid="footer-link-privacidad"
-              class="rounded-sm text-ink-muted underline-offset-4 transition-colors duration-fast hover:text-ink-inverse hover:underline"
-            >
+            <a href="#" data-testid="footer-link-privacidad" class={claseEnlace}>
               Aviso de privacidad
             </a>
           </li>
           <li>
-            <a
-              href="#"
-              data-testid="footer-link-terminos"
-              class="rounded-sm text-ink-muted underline-offset-4 transition-colors duration-fast hover:text-ink-inverse hover:underline"
-            >
+            <a href="#" data-testid="footer-link-terminos" class={claseEnlace}>
               Términos y condiciones
             </a>
           </li>
@@ -74,7 +121,7 @@ const currentYear = new Date().getFullYear();
       data-wa-footer-guard
       class="mt-space-6 border-t border-line-hairline pt-space-3 text-x-small text-ink-muted"
     >
-      <p>© {currentYear} Imprenta Escalante. Todos los derechos reservados.</p>
+      <p>© {currentYear} {SETTINGS.businessName}. Todos los derechos reservados.</p>
     </div>
   </div>
 </footer>

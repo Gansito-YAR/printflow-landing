@@ -9,6 +9,13 @@
  * "Cotizacion general" de la pagina. El FAB cubre esa zona.
  */
 import ProcessSteps from './ProcessSteps.astro';
+import { SETTINGS } from '../lib/settings';
+
+/* El porcentaje lo fija el ADMIN en el panel (business_settings.deposit_pct),
+   la misma fila que usa la nota de remision. Antes estaba escrito a mano aca:
+   si el dueno lo bajaba a 40 en el panel, el sitio seguia diciendo 50.
+   Se recorta el decimal cuando es redondo: "50 %", no "50.00 %". */
+const anticipo = SETTINGS.depositPct.toLocaleString("es-MX", { maximumFractionDigits: 2 });
 ---
 
 <section
@@ -22,7 +29,7 @@ import ProcessSteps from './ProcessSteps.astro';
   <p
     class="mt-space-3 max-w-2xl rounded-sm border-l-4 border-line-brand bg-surface-1 p-space-2 text-body text-ink-base"
   >
-    Los pedidos personalizados requieren un anticipo del 50% para iniciar producción. El
+    Los pedidos personalizados requieren un anticipo del {anticipo}% para iniciar producción. El
     saldo restante debe quedar liquidado antes de la entrega.
   </p>
 

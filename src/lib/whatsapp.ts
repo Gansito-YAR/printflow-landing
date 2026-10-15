@@ -1,8 +1,12 @@
 import type { ServiceId } from '../data/services';
+import { SETTINGS } from './settings';
 
 export type Placement = 'hero' | 'catalog' | 'fab' | 'trust';
 
-const WHATSAPP_E164 = import.meta.env.PUBLIC_WHATSAPP_E164 ?? '';
+/* El numero sale del panel administrativo, leido en el build (ver settings.ts).
+   Cuando no hay panel configurado, settings.ts cae a PUBLIC_WHATSAPP_E164, asi
+   que el contrato anterior sigue valiendo tal cual en local y en CI. */
+const WHATSAPP_E164 = SETTINGS.whatsappE164;
 
 /**
  * Valida el numero configurado en PUBLIC_WHATSAPP_E164.
