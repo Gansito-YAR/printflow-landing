@@ -35,7 +35,6 @@ export interface LandingSettings {
   hours: string | null;
   /** Porcentaje de anticipo. La copy lo cita; no se escribe a mano. */
   depositPct: number;
-  leadDays: number;
   mapsUrl: string | null;
   instagramUrl: string | null;
   facebookUrl: string | null;
@@ -49,7 +48,6 @@ const COLUMNAS = [
   'business_address',
   'business_hours',
   'deposit_pct',
-  'default_lead_days',
   'landing_whatsapp_e164',
   'landing_maps_url',
   'landing_instagram_url',
@@ -69,7 +67,6 @@ const RESPALDO: LandingSettings = {
   address: null,
   hours: null,
   depositPct: 50,
-  leadDays: 3,
   mapsUrl: null,
   instagramUrl: null,
   facebookUrl: null,
@@ -131,7 +128,6 @@ async function leerDelPanel(): Promise<LandingSettings> {
     address: texto(fila.business_address),
     hours: texto(fila.business_hours),
     depositPct: numero(fila.deposit_pct, RESPALDO.depositPct),
-    leadDays: numero(fila.default_lead_days, RESPALDO.leadDays),
     mapsUrl: enlace(fila.landing_maps_url),
     instagramUrl: enlace(fila.landing_instagram_url),
     facebookUrl: enlace(fila.landing_facebook_url),
