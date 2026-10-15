@@ -7,7 +7,7 @@
  * - Ancla al viewport (position: fixed), nunca a una columna del grid.
  * - Hitbox 56x56px. Mantiene una caja de exclusion de 72x72px en la
  *   esquina inferior derecha: ninguna seccion pone contenido ahi.
- * - No se renderiza si PUBLIC_WHATSAPP_E164 no esta configurado.
+ * - No se renderiza si no hay numero de WhatsApp cargado en el panel.
  */
 import WhatsAppIcon from './ui/WhatsAppIcon.astro';
 import { buildWhatsappHref } from '../lib/whatsapp';

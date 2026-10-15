@@ -9,7 +9,7 @@ export type Placement = 'hero' | 'catalog' | 'fab' | 'trust';
 const WHATSAPP_E164 = SETTINGS.whatsappE164;
 
 /**
- * Valida el numero configurado en PUBLIC_WHATSAPP_E164.
+ * Valida el numero que entrega el panel administrativo (ver settings.ts).
  * Formato E.164 sin "+": solo digitos, 10 a 15 caracteres.
  */
 export function isWhatsappConfigured(): boolean {
