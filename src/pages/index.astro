@@ -1,29 +1,43 @@
 ---
+/**
+ * Landing de Imprenta Escalante — version aprobada ("Escalante a Escala").
+ *
+ * Orden de la pagina:
+ *   portada (que imprimimos, con carrusel) → medidor a escala → franja →
+ *   catalogo → cifras y como trabajamos → ubicacion → cierre → pie.
+ *
+ * Todos los datos del negocio salen de business_settings en el build (ver
+ * lib/settings.ts). El sitio no hace ninguna request en runtime.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AnnouncementBar from '../components/AnnouncementBar.astro';
 import Header from '../components/Header.astro';
-import Hero from '../components/Hero.astro';
-import ServicesGrid from '../components/ServicesGrid.astro';
-import CatalogoGrid from '../components/CatalogoGrid.astro';
-import PedidoChips from '../components/PedidoChips.astro';
-import TrustPolicy from '../components/TrustPolicy.astro';
+import Portada from '../components/Portada.astro';
+import Medidor from '../components/Medidor.astro';
+import Cinta from '../components/Cinta.astro';
+import Catalogo from '../components/Catalogo.astro';
+import Proceso from '../components/Proceso.astro';
+import Ubicacion from '../components/Ubicacion.astro';
+import Cierre from '../components/Cierre.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppFab from '../components/WhatsAppFab.astro';
 ---
 
 <BaseLayout
   title="Imprenta Escalante — Cotiza tus impresos por WhatsApp"
-  description="Lonas, viniles, papelería comercial y promocionales para menudeo y mayoreo. Cotiza por WhatsApp y da seguimiento a tu pedido."
+  description="Lonas, viniles, papelería comercial y promocionales en Mérida. Mide tu pieza a escala y cotiza por WhatsApp."
   ogImage="/og-imprenta-escalante.jpg"
 >
   <AnnouncementBar />
   <Header />
   <main>
-    <Hero />
-    <ServicesGrid />
-    <CatalogoGrid />
-    <TrustPolicy />
-    <PedidoChips />
+    <Portada />
+    <Medidor />
+    <Cinta />
+    <Catalogo />
+    <Proceso />
+    <Ubicacion />
+    <Cierre />
   </main>
   <Footer />
   <WhatsAppFab />

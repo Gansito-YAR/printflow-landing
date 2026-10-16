@@ -1,0 +1,597 @@
+---
+/**
+ * Medidor a escala: compara la pieza contra una persona de 1.70 m y deja el
+ * mensaje de WhatsApp escrito con la medida. Es la seccion protagonista de la
+ * version aprobada.
+ *
+ * Diferencias con el boceto, todas a proposito:
+ *
+ *   1. Funciona sin JavaScript (AGENTS 18). El build dibuja la escena inicial
+ *      (lona de 3 m) y el enlace de WhatsApp real en el HTML; el script solo
+ *      la redibuja. En el boceto, sin JS quedaban un SVG vacio y un boton a
+ *      wa.me/ sin numero. Los controles que necesitan JS (chips, deslizador,
+ *      imagen) se ocultan si no corre, en vez de quedar como botones muertos.
+ *
+ *   2. El mensaje respeta el formato congelado de Fase 2.5 §3.4. La medida va
+ *      dentro de la linea "Quiero cotizar:" y se conserva la linea de
+ *      Referencia, que es la que permite saber de donde vino la cotizacion.
+ *      El service_id sale de la allowlist segun el producto.
+ *
+ *   3. "Sube tu diseno" pasa a "Prueba con tu diseno". La imagen nunca sale
+ *      del dispositivo: no hay a donde subirla. Con el texto original alguien
+ *      podia mandar el WhatsApp creyendo que su arte ya habia llegado.
+ *
+ *   4. El titulo de la seccion es h2. El boceto tenia dos h1 en la pagina.
+ *
+ *   5. El lector de pantalla no recibe un anuncio por cada pixel del
+ *      deslizador: el aviso sale al soltarlo, no en cada movimiento.
+ *
+ * Hay dos <input> (deslizador e imagen) y ningun <form>: nada se envia ni se
+ * guarda. La regla de "sin formularios ni captura de datos" (AGENTS 17) se
+ * respeta en lo que protege.
+ */
+import WhatsAppIcon from './ui/WhatsAppIcon.astro';
+import { ESCENA_H, ESCENA_W, PRODUCTOS, altoDe, anchoInicial, escena, etiquetaCotizacion, fmt } from '../lib/escena';
+import { buildWaMessage } from '../lib/wa-message';
+import { buildWhatsappHref, whatsappNumber } from '../lib/whatsapp';
+
+const p0 = PRODUCTOS[0];
+const ancho0 = anchoInicial(p0);
+const nodos = escena(p0, ancho0);
+const etiqueta0 = etiquetaCotizacion(p0, ancho0);
+const href0 = buildWhatsappHref(etiqueta0, p0.servicio, 'hero');
+const numero = whatsappNumber();
+
+/* Las medidas del mensaje van resaltadas. Se parte en trozos en el build
+   para no armar HTML a mano: Astro escapa cada trozo. */
+const partir = (texto: string) =>
+  texto.split(/(\d+(?:\.\d+)?\s(?:m|cm))/g).map((t, i) => ({ t, resaltar: i % 2 === 1 }));
+const mensaje0 = partir(buildWaMessage(etiqueta0, p0.servicio, 'hero'));
+
+const valor0 = fmt(ancho0).split(' ');
+---
+
+<section class="medidor" id="medir" data-testid="medidor">
+  <div class="wrap">
+    <div class="medidor-cab">
+      <p class="eyebrow">Antes de cotizar</p>
+      <h2 class="medidor-titulo">¿Qué tan grande<br />es <em>3 metros</em>?</h2>
+      <p class="lead">
+        Nadie lo sabe hasta que lo ve. Mueve la medida y compárala contra una persona de
+        1.70&nbsp;m. Cuando te cuadre, el mensaje de WhatsApp ya va escrito con tus números.
+      </p>
+    </div>
+
+    <div class="viz" data-medidor data-wa-numero={numero ?? ''}>
+      <div class="panel">
+        <div class="campo" data-requiere-js>
+          <span class="lbl" id="lbl-prod">Qué vas a imprimir</span>
+          <div class="chips" role="group" aria-labelledby="lbl-prod">
+            {
+              PRODUCTOS.map((p, i) => (
+                <button type="button" class="chip" data-producto={p.id} aria-pressed={i === 0 ? 'true' : 'false'}>
+                  {p.nom}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="campo">
+          <label class="lbl" for="medidor-rango" data-lbl-med>Ancho</label>
+          <div class="medida-fila">
+            <span class="n" data-valor>{valor0[0]}<small>{valor0[1]}</small></span>
+            <span class="alto" data-alto>alto {fmt(altoDe(p0, ancho0))}</span>
+          </div>
+          <input
+            type="range"
+            id="medidor-rango"
+            data-rango
+            data-requiere-js
+            min={p0.min}
+            max={p0.max}
+            step="10"
+            value={ancho0}
+            aria-valuetext={fmt(ancho0)}
+          />
+        </div>
+
+        <label class="subir" data-requiere-js>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M12 16V4m0 0L7 9m5-5 5 5M4 18v2h16v-2"></path>
+          </svg>
+          <span data-nombre-archivo>Prueba con tu diseño (opcional)</span>
+          <input type="file" accept="image/*" data-archivo />
+        </label>
+        <p class="subir-nota" data-requiere-js>
+          Tu imagen no se sube a ningún lado: solo la ves aquí. Mándala por WhatsApp junto con la medida.
+        </p>
+
+        <p class="mensaje" data-mensaje>
+          {mensaje0.map((m) => (m.resaltar ? <b>{m.t}</b> : m.t))}
+        </p>
+        <p class="sr-only" aria-live="polite" data-aviso></p>
+
+        {
+          href0 ? (
+            <a
+              class="btn btn-ppal"
+              id="cta-medidor"
+              href={href0}
+              data-wa-link
+              data-cta-medidor
+              data-testid="cta-medidor"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <WhatsAppIcon class="ico" />
+              <span data-wa-label>Mandar esta medida</span>
+            </a>
+          ) : (
+            <span class="btn btn-off" aria-disabled="true" title="Contacto no disponible por el momento" data-testid="cta-medidor">
+              Contacto no disponible
+            </span>
+          )
+        }
+      </div>
+
+      <div class="escena">
+        <svg viewBox={`0 0 ${ESCENA_W} ${ESCENA_H}`} role="img" aria-labelledby="escena-t" data-escena>
+          <title id="escena-t">Comparación de tamaño contra una persona de 1.70 metros</title>
+          <g data-escena-nodos>
+            {
+              nodos.map((n) => {
+                const Tag = n.tag;
+                return (
+                  <Tag class={n.clase} {...n.attrs}>
+                    {n.texto}
+                  </Tag>
+                );
+              })
+            }
+          </g>
+        </svg>
+        <span class="nota-escala">Referencia · persona de 1.70 m</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .medidor {
+    padding-block: clamp(26px, 5vh, 52px) clamp(32px, 6vh, 64px);
+  }
+
+  .medidor-cab {
+    display: grid;
+    gap: 14px;
+    margin-bottom: clamp(20px, 3.6vh, 34px);
+  }
+
+  .medidor-titulo {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.3rem, 6.8vw, 5rem);
+    /* 1.02 y no 0.9: la cola de la Q de "¿QUÉ" (0.12 em bajo la linea)
+       tocaba la E de "ES" en el renglon de abajo. */
+    line-height: 1.02;
+    letter-spacing: -0.012em;
+    text-transform: uppercase;
+    color: var(--ink-strong);
+    margin: 0;
+  }
+
+  .medidor-titulo em {
+    font-style: normal;
+    color: var(--ink-brand);
+  }
+
+  .viz {
+    display: grid;
+    gap: clamp(16px, 2.4vw, 26px);
+    grid-template-columns: minmax(0, 1fr);
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    padding: clamp(16px, 2.4vw, 24px);
+  }
+
+  /* En telefono la escena va ARRIBA: debajo de los controles moverias la
+     medida sin ver lo que mides, que es para lo que sirve la herramienta. */
+  .escena {
+    order: 1;
+  }
+
+  .panel {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  @media (min-width: 940px) {
+    .viz {
+      grid-template-columns: 340px minmax(0, 1fr);
+    }
+
+    .panel {
+      order: 1;
+    }
+
+    .escena {
+      order: 2;
+    }
+  }
+
+  .campo {
+    display: grid;
+    gap: 9px;
+  }
+
+  .lbl {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .medida-fila {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .n {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 4.2vw, 2.5rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-strong);
+  }
+
+  .n small {
+    font-size: 0.4em;
+    color: var(--ink-brand);
+    margin-left: 3px;
+  }
+
+  .alto {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--ink-muted);
+  }
+
+  /* 44px de alto: area tactil comoda aunque el riel sea fino. */
+  input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 4px;
+    background: var(--border-hairline);
+    border-radius: var(--radius-pill);
+  }
+
+  input[type='range']::-moz-range-track {
+    height: 4px;
+    background: var(--border-hairline);
+    border-radius: var(--radius-pill);
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--action-primary-bg);
+    border: 3px solid var(--surface-1);
+    margin-top: -10px;
+    box-shadow: var(--shadow-md);
+  }
+
+  input[type='range']::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--action-primary-bg);
+    border: 3px solid var(--surface-1);
+    box-shadow: var(--shadow-md);
+  }
+
+  input[type='range']:focus-visible {
+    outline-offset: 4px;
+    border-radius: var(--radius-pill);
+  }
+
+  .subir {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-base);
+    border: 1.5px dashed var(--border-hairline);
+    border-radius: 12px;
+    padding: 12px 14px;
+    min-height: 44px;
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast) ease,
+      color var(--duration-fast) ease;
+  }
+
+  .subir:hover {
+    border-color: var(--border-control);
+    color: var(--ink-strong);
+  }
+
+  .subir:focus-within {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .subir input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .subir-nota {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--ink-muted);
+    margin: -10px 0 0;
+  }
+
+  .mensaje {
+    margin: 0;
+    background: var(--surface-0);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 13px 15px;
+    font-family: var(--font-mono);
+    font-size: 0.65625rem;
+    line-height: 1.85;
+    color: var(--ink-base);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  .mensaje :global(b) {
+    color: var(--ink-brand);
+    font-weight: 400;
+  }
+
+  .btn :global(.ico) {
+    width: 20px;
+    height: 20px;
+  }
+
+  .escena {
+    position: relative;
+    min-width: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: linear-gradient(
+      180deg,
+      var(--viz-stage-top) 0%,
+      var(--viz-stage-bottom) 62%,
+      var(--surface-0) 62%,
+      var(--surface-0) 100%
+    );
+    display: grid;
+    place-items: center;
+    padding: clamp(12px, 2vw, 20px);
+    min-height: 330px;
+  }
+
+  .escena svg {
+    width: 100%;
+    height: auto;
+    max-height: 52vh;
+    display: block;
+  }
+
+  /* Los nodos los crea tambien el script en el navegador, y esos no llevan
+     el atributo de scope de Astro: por eso van con :global. */
+  .escena :global(.viz-suelo) {
+    stroke: var(--viz-floor);
+    stroke-width: 2;
+  }
+
+  .escena :global(.viz-pieza) {
+    fill: var(--viz-piece);
+    stroke: var(--viz-piece-edge);
+    stroke-width: 2;
+  }
+
+  .escena :global(.viz-pieza.con-arte) {
+    fill: none;
+  }
+
+  .escena :global(.viz-silueta) {
+    fill: var(--viz-figure);
+  }
+
+  .escena :global(.viz-cota) {
+    stroke: var(--viz-measure);
+    stroke-width: 1;
+  }
+
+  .escena :global(.viz-cota-txt) {
+    fill: var(--ink-brand);
+    font-family: var(--font-mono);
+    font-size: 18px;
+  }
+
+  .escena :global(.viz-ref-txt) {
+    fill: var(--viz-measure);
+    font-family: var(--font-mono);
+    font-size: 14px;
+  }
+
+  .nota-escala {
+    position: absolute;
+    left: 14px;
+    bottom: 11px;
+    font-family: var(--font-mono);
+    font-size: 0.59375rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+</style>
+
+<script>
+  import { PRODUCTOS, altoDe, anchoInicial, escena, etiquetaCotizacion, fmt, type Producto } from '../lib/escena';
+  import { buildWaHref, buildWaMessage } from '../lib/wa-message';
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const raiz = document.querySelector<HTMLElement>('[data-medidor]');
+
+  if (raiz) {
+    const numero = raiz.dataset.waNumero ?? '';
+    const nodosG = raiz.querySelector<SVGGElement>('[data-escena-nodos]');
+    const rango = raiz.querySelector<HTMLInputElement>('[data-rango]');
+    const valor = raiz.querySelector<HTMLElement>('[data-valor]');
+    const alto = raiz.querySelector<HTMLElement>('[data-alto]');
+    const lblMed = raiz.querySelector<HTMLElement>('[data-lbl-med]');
+    const mensaje = raiz.querySelector<HTMLElement>('[data-mensaje]');
+    const aviso = raiz.querySelector<HTMLElement>('[data-aviso]');
+    const cta = raiz.querySelector<HTMLAnchorElement>('[data-cta-medidor]');
+    const archivo = raiz.querySelector<HTMLInputElement>('[data-archivo]');
+    const nombreArchivo = raiz.querySelector<HTMLElement>('[data-nombre-archivo]');
+    const chips = Array.from(raiz.querySelectorAll<HTMLButtonElement>('[data-producto]'));
+
+    let producto: Producto = PRODUCTOS[0];
+    let ancho = anchoInicial(producto);
+    let arte: string | null = null;
+
+    const pintarEscena = (): void => {
+      if (!nodosG) return;
+      const nuevos: SVGElement[] = escena(producto, ancho).map((n) => {
+        const el = document.createElementNS(SVG_NS, n.tag);
+        el.setAttribute('class', n.clase);
+        for (const [k, v] of Object.entries(n.attrs)) el.setAttribute(k, String(v));
+        if (n.texto) el.textContent = n.texto;
+        return el;
+      });
+
+      /* Con imagen propia, el diseno se pinta encima de la pieza y la pieza
+         queda solo como contorno. */
+      const pieza = nuevos.find((el) => el.getAttribute('class') === 'viz-pieza');
+      if (arte && pieza) {
+        const img = document.createElementNS(SVG_NS, 'image');
+        for (const k of ['x', 'y', 'width', 'height']) img.setAttribute(k, pieza.getAttribute(k) ?? '0');
+        img.setAttribute('href', arte);
+        /* meet y no slice: la pregunta es si TU diseno entra en la pieza, asi
+           que se muestra entero. slice lo recortaba para llenarla. */
+        img.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        pieza.setAttribute('class', 'viz-pieza con-arte');
+        nuevos.splice(nuevos.indexOf(pieza), 0, img);
+      }
+      nodosG.replaceChildren(...nuevos);
+    };
+
+    const pintarMensaje = (texto: string): void => {
+      if (!mensaje) return;
+      const trozos = texto.split(/(\d+(?:\.\d+)?\s(?:m|cm))/g);
+      mensaje.replaceChildren(
+        ...trozos.map((t, i) => {
+          if (i % 2 === 0) return document.createTextNode(t);
+          const b = document.createElement('b');
+          b.textContent = t;
+          return b;
+        }),
+      );
+    };
+
+    const pintar = (): void => {
+      const [num, unidad] = fmt(ancho).split(' ');
+      if (valor) {
+        const small = document.createElement('small');
+        small.textContent = unidad;
+        valor.replaceChildren(document.createTextNode(num), small);
+      }
+      if (alto) alto.textContent = `alto ${fmt(altoDe(producto, ancho))}`;
+      if (lblMed) lblMed.textContent = producto.id === 'playera' ? 'Ancho del estampado' : 'Ancho';
+      if (rango) {
+        rango.hidden = Boolean(producto.fijo);
+        rango.setAttribute('aria-valuetext', fmt(ancho));
+      }
+
+      const etiqueta = etiquetaCotizacion(producto, ancho);
+      const texto = buildWaMessage(etiqueta, producto.servicio, 'hero');
+      pintarMensaje(texto);
+      if (cta && numero) cta.href = buildWaHref(numero, texto);
+      pintarEscena();
+    };
+
+    const anunciar = (): void => {
+      if (aviso) aviso.textContent = etiquetaCotizacion(producto, ancho);
+    };
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const p = PRODUCTOS.find((x) => x.id === chip.dataset.producto);
+        if (!p) return;
+        producto = p;
+        ancho = anchoInicial(p);
+        if (rango && !p.fijo) {
+          rango.min = String(p.min);
+          rango.max = String(p.max);
+          rango.step = (p.max ?? 0) <= 40 ? '1' : '10';
+          rango.value = String(ancho);
+        }
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        pintar();
+        anunciar();
+      });
+    });
+
+    rango?.addEventListener('input', () => {
+      ancho = Number(rango.value);
+      pintar();
+    });
+    /* El aviso al lector de pantalla sale al soltar, no en cada movimiento. */
+    rango?.addEventListener('change', anunciar);
+
+    archivo?.addEventListener('change', () => {
+      const f = archivo.files?.[0];
+      if (!f) return;
+      if (!f.type.startsWith('image/')) {
+        if (nombreArchivo) nombreArchivo.textContent = 'Ese archivo no es una imagen';
+        return;
+      }
+      const lector = new FileReader();
+      lector.onerror = () => {
+        if (nombreArchivo) nombreArchivo.textContent = 'No se pudo leer la imagen';
+      };
+      lector.onload = () => {
+        arte = typeof lector.result === 'string' ? lector.result : null;
+        if (nombreArchivo) nombreArchivo.textContent = f.name.length > 22 ? `${f.name.slice(0, 20)}…` : f.name;
+        pintarEscena();
+      };
+      lector.readAsDataURL(f);
+    });
+  }
+</script>

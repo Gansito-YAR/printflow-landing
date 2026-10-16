@@ -1,0 +1,95 @@
+---
+/**
+ * Franja de productos en movimiento, entre el medidor y el catalogo.
+ *
+ * En el boceto casi no se veia, y el cliente lo marco ("esto no se nota
+ * casi"): el texto era --tinta-3 sobre --tinta-2, medido en 1.12:1. Ahora es
+ * banda naranja con texto negro (7.16:1), alternando palabras solidas y en
+ * contorno para darle textura sin perder lectura.
+ *
+ * Es decorativa (aria-hidden): repite productos que la pagina ya nombra. Por
+ * eso el movimiento queda sujeto al control global de la portada:
+ *   - solo se anima si existe el boton de pausa (html.anim-ok);
+ *   - se detiene con ese boton (html.anim-pausada), al pasar el mouse y con
+ *     prefers-reduced-motion.
+ * Sin JS se queda quieta en vez de moverse sin forma de pararla (WCAG 2.2.2).
+ */
+const ITEMS = [
+  'Lonas',
+  'Viniles',
+  'Letras luminosas',
+  'Microperforado',
+  'Etiquetas',
+  'Volantes',
+  'Menús',
+  'Recetarios',
+  'Tarjetas',
+  'Serigrafía',
+  'Bordado',
+  'Calendarios',
+  'Agendas',
+  'Stands',
+];
+
+/* Dos vueltas seguidas: la animacion corre la mitad y vuelve a empezar sin
+   salto, porque la segunda mitad es identica a la primera. */
+const pista = [...ITEMS, ...ITEMS];
+---
+
+<div class="cinta" aria-hidden="true" data-testid="cinta">
+  <div class="cinta-pista">
+    {pista.map((x, i) => <span class:list={['cinta-item', i % 2 === 1 && 'contorno']}>{x}</span>)}
+  </div>
+</div>
+
+<style>
+  .cinta {
+    background: var(--surface-brand);
+    overflow: hidden;
+    padding-block: 14px;
+  }
+
+  .cinta-pista {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.8vw, 2.1rem);
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--ink-onBrand);
+  }
+
+  /* Separador entre palabras: un punto en la tinta de la banda. */
+  .cinta-item::after {
+    content: '';
+    display: inline-block;
+    width: 0.22em;
+    height: 0.22em;
+    margin-inline: 0.75em;
+    border-radius: 50%;
+    background: var(--ink-onBrand);
+    vertical-align: middle;
+  }
+
+  .contorno {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--ink-onBrand);
+  }
+
+  :global(html.anim-ok) .cinta-pista {
+    animation: correr 42s linear infinite;
+  }
+
+  :global(html.anim-pausada) .cinta-pista,
+  .cinta:hover .cinta-pista {
+    animation-play-state: paused;
+  }
+
+  @keyframes correr {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+</style>
