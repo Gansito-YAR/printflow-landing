@@ -1,7 +1,8 @@
 import type { ServiceId } from '../data/services';
 import { SETTINGS } from './settings';
+import { buildWaHref, buildWaMessage, isValidE164, type Placement } from './wa-message';
 
-export type Placement = 'hero' | 'catalog' | 'fab' | 'trust';
+export type { Placement };
 
 /* El numero sale del panel administrativo, leido en el build (ver settings.ts).
    Cuando no hay panel configurado, settings.ts cae a PUBLIC_WHATSAPP_E164, asi
@@ -13,7 +14,12 @@ const WHATSAPP_E164 = SETTINGS.whatsappE164;
  * Formato E.164 sin "+": solo digitos, 10 a 15 caracteres.
  */
 export function isWhatsappConfigured(): boolean {
-  return /^[0-9]{10,15}$/.test(WHATSAPP_E164);
+  return isValidE164(WHATSAPP_E164);
+}
+
+/** El numero, para los componentes que rearman el enlace en el navegador. */
+export function whatsappNumber(): string | null {
+  return isWhatsappConfigured() ? WHATSAPP_E164 : null;
 }
 
 /**
@@ -29,11 +35,5 @@ export function buildWhatsappHref(
   placement: Placement,
 ): string | null {
   if (!isWhatsappConfigured()) return null;
-
-  const message =
-    `Hola, vengo del sitio de Imprenta Escalante.\n` +
-    `Quiero cotizar: ${serviceLabel}.\n` +
-    `Referencia: source=landing;service_id=${serviceId};placement=${placement}.`;
-
-  return `https://wa.me/${WHATSAPP_E164}?text=${encodeURIComponent(message)}`;
+  return buildWaHref(WHATSAPP_E164, buildWaMessage(serviceLabel, serviceId, placement));
 }

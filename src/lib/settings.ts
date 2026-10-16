@@ -89,6 +89,22 @@ const enlace = (v: unknown): string | null => {
   return s && s.startsWith('https://') ? s : null;
 };
 
+/**
+ * Perfil de una red social. Ademas de https://, exige que la URL apunte a un
+ * perfil y no a la portada de la red: "https://www.instagram.com/" pasa el
+ * CHECK de la base, pero un boton "Escribir por Instagram" que abre la portada
+ * de Instagram es un enlace roto con apariencia de funcionar.
+ */
+const perfil = (v: unknown): string | null => {
+  const s = enlace(v);
+  if (!s) return null;
+  try {
+    return new URL(s).pathname.replace(/\//g, '') === '' ? null : s;
+  } catch {
+    return null;
+  }
+};
+
 /** wa.me exige solo digitos. Un valor fuera de formato se descarta entero. */
 const telefonoWhatsapp = (v: unknown): string => {
   const s = texto(v) ?? '';
@@ -129,8 +145,8 @@ async function leerDelPanel(): Promise<LandingSettings> {
     hours: texto(fila.business_hours),
     depositPct: numero(fila.deposit_pct, RESPALDO.depositPct),
     mapsUrl: enlace(fila.landing_maps_url),
-    instagramUrl: enlace(fila.landing_instagram_url),
-    facebookUrl: enlace(fila.landing_facebook_url),
+    instagramUrl: perfil(fila.landing_instagram_url),
+    facebookUrl: perfil(fila.landing_facebook_url),
     announcement: texto(fila.landing_announcement),
   };
 }
@@ -142,3 +158,10 @@ export const hayPanelConfigurado = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const SETTINGS: LandingSettings = hayPanelConfigurado
   ? await leerDelPanel()
   : RESPALDO;
+
+/**
+ * Hay algo que mostrar en la seccion de ubicacion. La usan la seccion y el
+ * header: si el ADMIN no cargo mapa, direccion ni horario, la seccion no se
+ * dibuja y el enlace del menu tampoco, para no apuntar a un ancla vacia.
+ */
+export const HAY_UBICACION = Boolean(SETTINGS.mapsUrl || SETTINGS.address || SETTINGS.hours);
