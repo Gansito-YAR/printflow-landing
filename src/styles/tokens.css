@@ -1,5 +1,6 @@
 /*
- * Design tokens — Fase 2 (identidad visual Imprenta Escalante).
+ * Design tokens — Fase 2 (identidad visual Imprenta Escalante), ajustados a
+ * la version aprobada del boceto "Escalante a Escala".
  *
  * ARQUITECTURA DE DOS CAPAS (Fase 2 §1.1). No la rompas:
  *
@@ -8,10 +9,9 @@
  *   Capa 2 — SEMANTICAS: los nombres que consumen los componentes. Apuntan a
  *            primitivas, nunca al reves.
  *
- * Regla dura: ningun componente menciona una primitiva --brand-* ni un color
- * literal. Los componentes usan clases de Tailwind mapeadas a la capa 2
- * (ver tailwind.config.mjs). Si el dueno pide "menos naranja", se cambia UN
- * valor en la capa 1 y el sitio entero se reajusta con coherencia.
+ * Regla dura: ningun componente menciona una primitiva ni un color literal.
+ * Si el dueno pide "menos naranja", se cambia UN valor en la capa 1 y el
+ * sitio entero se reajusta con coherencia.
  */
 
 /* ========================================================================
@@ -23,96 +23,105 @@
   --brand-100: #fde3cd;
   --brand-200: #fbc79b;
   --brand-300: #f9a869;
+  --brand-400: #ff9a4d; /* brillo: borde de la pieza en el medidor */
   --brand-500: #f47920; /* tono principal de la marca */
   --brand-600: #db6812;
-  --brand-700: #b0540f; /* hover del CTA primario */
+  --brand-700: #b0540f;
+  --brand-800: #a8500d; /* borde del boton fantasma */
   --brand-900: #6b330a;
 
-  /* Neutros. El negro carbon del material impreso, no un negro puro. */
+  /* Carbon: el negro del material impreso, en cinco escalones. */
+  --carbon-950: #0a0a0b;
+  --carbon-900: #131317;
+  --carbon-800: #1e1e25;
+  --carbon-700: #26262e;
+  --carbon-600: #3a3a44;
+
+  /* Papel y piedra: los claros calidos del boceto aprobado. No son grises
+     neutros a proposito: tiran al papel, no a la pantalla. */
+  --paper-100: #f4f2ec;
+  --stone-300: #cbc6bb;
+  --stone-500: #8d887e;
+
+  /* Neutros heredados de Fase 2. Siguen en uso en el FAB y los estados
+     deshabilitados. */
   --neutral-0: #ffffff;
   --neutral-50: #fafafa;
-  --neutral-100: #f4f4f5;
   --neutral-200: #e4e4e7;
-  --neutral-300: #d4d4d8;
+  --neutral-400: #a1a1aa;
   --neutral-500: #52525b;
+  --neutral-600: #71717a;
   --neutral-700: #33333a;
-  --neutral-900: #1c1c20;
-  --neutral-950: #121215; /* superficies oscuras: header y footer */
-
-  /* Sombras — unica excepcion donde se usa rgb() en la capa de primitivas. */
-  --shadow-raw-sm: 0 1px 2px rgb(18 18 21 / 0.08);
-  --shadow-raw-md: 0 4px 12px rgb(18 18 21 / 0.14);
-  --shadow-raw-lg: 0 8px 24px rgb(18 18 21 / 0.18);
+  --neutral-950: #121215;
 }
 
 /* ========================================================================
  * CAPA 2 — SEMANTICAS
  *
  * EL TEMA BASE ES OSCURO. No es una variante por preferencia del sistema:
- * es el tema del sitio, porque el catalogo 2026 que aprobo el cliente esta
- * disenado sobre fondo negro y el naranja de marca solo rinde ahi.
- *
- * Las primitivas no cambian. El naranja es el mismo que se aprobo en la
- * Etapa 1; lo unico que se reasigno es que token semantico apunta a cual.
+ * es el tema del sitio, porque el material de la imprenta esta disenado
+ * sobre fondo negro y el naranja de marca solo rinde ahi.
  * ===================================================================== */
 :root {
   /* --- Superficies --- */
-  --surface-0: var(--neutral-950); /* fondo de pagina */
-  --surface-1: var(--neutral-900); /* tarjetas, bloques */
-  --surface-2: #26262b; /* placeholders de imagen */
-  --surface-3: #33333a; /* tramas, separadores fuertes */
-  --surface-inverse: #09090b; /* header y footer: mas hundidos que la pagina */
-  --surface-brand: var(--brand-500); /* bloques de acento */
-  /* Papel: la hoja del indice y cualquier bloque que simule impreso. Es la
-   * unica superficie clara del sitio, y existe para que se lea como papel
-   * sobre fondo negro, no como un bloque sin tema. */
-  --surface-paper: #f6f5f2;
-  --ink-on-paper: var(--neutral-950);
-  --ink-on-paper-muted: var(--neutral-700);
-  /* Espiral metalica del indice. Tres paradas para dar volumen al anillo:
-   * brillo, cuerpo y sombra propia. */
-  --binding-light: #ffd166;
-  --binding-base: #f0a52a;
-  --binding-dark: #b56f10;
+  --surface-0: var(--carbon-950); /* fondo de pagina */
+  --surface-1: var(--carbon-900); /* tarjetas, bloques, el medidor */
+  --surface-2: var(--carbon-800); /* placeholders, campos */
+  --surface-3: var(--carbon-700);
+  --surface-inverse: var(--carbon-950);
+  --surface-brand: var(--brand-500); /* bloques de acento: cierre, franja */
 
-  /* --- Tinta --- */
-  --ink-strong: var(--neutral-50); /* titulos */
-  --ink-base: var(--neutral-200); /* cuerpo */
-  --ink-muted: #a1a1aa; /* secundario, deshabilitado */
-  --ink-inverse: var(--neutral-0);
-  --ink-inverse-muted: #a1a1aa;
-  /* Sobre fondo oscuro, brand-700 se apaga. brand-500 da 6.77:1. */
+  /* --- Tinta ---
+   * Medido sobre --surface-0 (ver la seccion de verificacion
+   * del PR): strong 17.68:1, base 11.62:1, muted 5.61:1, brand 7.16:1.
+   * Sobre --surface-1 bajan a 16.55, 10.88, 5.26 y 6.71: todos pasan AA. */
+  --ink-strong: var(--paper-100);
+  --ink-base: var(--stone-300);
+  --ink-muted: var(--stone-500);
+  --ink-inverse: var(--paper-100);
+  --ink-inverse-muted: var(--stone-500);
   --ink-brand: var(--brand-500);
-  --ink-onBrand: var(--neutral-950); /* texto sobre el naranja de marca */
+  --ink-onBrand: var(--carbon-950); /* negro sobre naranja: 7.16:1 */
 
   /* --- Bordes ---
-   * El hairline es decorativo, no borde de control, asi que no le aplica el
-   * 3:1. Se sube igual porque es lo unico que separa una tarjeta del fondo. */
-  --border-hairline: #52525b;
-  --border-strong: var(--neutral-200);
-  --border-inverse: #3f3f46;
+   * El hairline es decorativo, no borde de control: no le aplica el 3:1.
+   * --border-control si separa un control de su fondo y cumple 3:1. */
+  --border-subtle: var(--carbon-800);
+  --border-hairline: var(--carbon-700);
+  --border-strong: var(--stone-300);
+  --border-inverse: var(--carbon-700);
   --border-brand: var(--brand-500);
+  --border-control: var(--brand-800); /* 3.60:1 sobre surface-0, 3.37:1 sobre surface-1 */
 
   /* --- Accion primaria --- */
   --action-primary-bg: var(--brand-500);
   --action-primary-text: var(--ink-onBrand);
-  --action-primary-border: var(--brand-700);
-  --action-primary-bg-hover: var(--brand-600);
+  --action-primary-border: var(--brand-500);
+  --action-primary-bg-hover: var(--paper-100);
+  --action-primary-text-hover: var(--carbon-950);
 
-  /* --- Accion secundaria --- */
+  /* --- Accion secundaria (boton fantasma) --- */
   --action-secondary-text: var(--ink-brand);
-  --action-secondary-border: var(--border-brand);
+  --action-secondary-border: var(--border-control);
 
-  /* --- Accion deshabilitada ---
-   * El borde cumple 3:1 contra su fondo, que es lo que exigen los bordes de
-   * control (Fase 2 §1.2.2), y refuerza que el estado no dependa solo del tono. */
-  --action-disabled-bg: #26262b;
-  --action-disabled-text: #a1a1aa;
-  --action-disabled-border: #71717a;
+  /* --- Accion deshabilitada --- */
+  --action-disabled-bg: var(--carbon-800);
+  --action-disabled-text: var(--neutral-400);
+  --action-disabled-border: var(--neutral-600);
 
-  /* --- Foco ---
-   * Sobre fondo oscuro un anillo negro desaparece. */
+  /* --- Foco --- Sobre fondo oscuro un anillo negro desaparece. */
   --focus-ring: var(--brand-500);
+  /* Sobre el naranja, el anillo naranja desaparece: se invierte. */
+  --focus-ring-on-brand: var(--carbon-950);
+
+  /* --- Medidor a escala --- */
+  --viz-floor: var(--carbon-700);
+  --viz-figure: var(--carbon-600);
+  --viz-piece: var(--brand-500);
+  --viz-piece-edge: var(--brand-400);
+  --viz-measure: var(--stone-500);
+  --viz-stage-top: var(--carbon-900);
+  --viz-stage-bottom: var(--carbon-950);
 
   /* --- Grid de 8 puntos (Fase 1 §6.2) — NO TOCAR --- */
   --space-1: 8px;
@@ -130,6 +139,9 @@
   --header-height-desktop: 72px;
   --header-height-mobile: 56px;
   --container-max: 1344px;
+  /* Margen lateral del boceto: 16px en telefono, crece hasta 48px. El minimo
+     respeta los 16px del grid de 8 puntos. */
+  --gutter: clamp(16px, 4vw, 48px);
 
   /* --- FAB (Fase 1 §8.3) — NO TOCAR --- */
   --fab-hitbox: 56px;
@@ -137,31 +149,33 @@
   --fab-offset-desktop: 24px;
   --fab-offset-mobile: 16px;
 
-  /* --- Tipografia (Fase 2 §2.4) --- */
+  /* --- Tipografia ---
+   * Anton para display (sin cambios). Familjen Grotesk reemplaza a Barlow en
+   * el cuerpo: fue el pedido explicito al revisar el boceto ("la tipografia
+   * que sigues utilizando... siento que es MUY TIPICA"). Martian Mono para
+   * datos: medidas, rotulos y numeros de paso. Las tres autohospedadas. */
   --font-display: 'Anton', 'Arial Narrow', 'Helvetica Neue', system-ui, sans-serif;
-  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-body: 'Familjen Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Martian Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --text-h1: 2rem; /* 32px mobile */
-  --text-h1-desktop: 3.5rem; /* 56px */
-  /* Cifra protagonista: el ano del catalogo. Escala con el viewport porque
-   * su trabajo es llenar el ancho, no medir un tamano fijo. */
-  --text-display: clamp(5rem, 21vw, 17rem);
-  --text-h2: 1.5rem; /* 24px */
-  --text-h2-desktop: 2rem; /* 32px */
-  --text-h3: 1.125rem; /* 18px */
-  --text-body: 1rem; /* 16px */
-  --text-body-lg: 1.125rem; /* 18px */
-  --text-small: 0.875rem; /* 14px */
-  --text-xs: 0.75rem; /* 12px */
+  --text-h1: 2rem;
+  --text-h1-desktop: 3.5rem;
+  --text-h2: 1.5rem;
+  --text-h2-desktop: 2rem;
+  --text-h3: 1.125rem;
+  --text-body: 1rem;
+  --text-body-lg: 1.125rem;
+  --text-small: 0.875rem;
+  --text-xs: 0.75rem;
 
-  /* --- Radios y elevacion (Fase 2 §4.1 y §4.2) --- */
+  /* --- Radios --- */
   --radius-sm: 4px;
   --radius-md: 8px;
+  --radius-lg: 14px; /* piezas del catalogo, escena del medidor */
+  --radius-xl: 20px; /* contenedor del medidor */
+  --radius-pill: 999px;
 
-  --shadow-sm: var(--shadow-raw-sm);
-  --shadow-md: var(--shadow-raw-md);
-  /* Sobre fondo oscuro una sombra negra suave no se ve. Se refuerzan para
-   * que el FAB y las tarjetas conserven su jerarquia. */
+  /* --- Elevacion --- Sobre fondo oscuro una sombra suave no se ve. */
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
   --shadow-md: 0 4px 12px rgb(0 0 0 / 0.6);
   --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.7);
@@ -169,15 +183,13 @@
   /* --- Movimiento (Fase 2 §4.3) --- */
   --duration-fast: 150ms;
   --duration-base: 200ms;
+  --ease-out: cubic-bezier(0.2, 0.85, 0.25, 1);
 }
 
 /*
- * Superficie hundida. La usan el header y el footer. Con el tema oscuro como
- * base ya no invierte nada: solo baja un escalon mas que la pagina para
- * separarse de ella, y refuerza el borde interno.
+ * Superficie hundida para el FAB y bloques heredados. Con el tema oscuro
+ * como base ya no invierte nada: solo refuerza el borde interno.
  */
 .surface-inverse {
-  --surface-1: #26262b;
-  --surface-2: #26262b;
-  --border-hairline: #3f3f46;
+  --border-hairline: var(--carbon-700);
 }

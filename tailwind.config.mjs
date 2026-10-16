@@ -31,9 +31,7 @@ export default {
           2: 'var(--surface-2)',
           3: 'var(--surface-3)',
           inverse: 'var(--surface-inverse)',
-          brand: 'var(--surface-brand)',
-          paper: 'var(--surface-paper)',
-        },
+          brand: 'var(--surface-brand)',        },
         ink: {
           strong: 'var(--ink-strong)',
           base: 'var(--ink-base)',
@@ -41,10 +39,7 @@ export default {
           inverse: 'var(--ink-inverse)',
           'inverse-muted': 'var(--ink-inverse-muted)',
           brand: 'var(--ink-brand)',
-          'on-brand': 'var(--ink-onBrand)',
-          'on-paper': 'var(--ink-on-paper)',
-          'on-paper-muted': 'var(--ink-on-paper-muted)',
-        },
+          'on-brand': 'var(--ink-onBrand)',        },
         line: {
           hairline: 'var(--border-hairline)',
           strong: 'var(--border-strong)',
@@ -67,22 +62,13 @@ export default {
 
       fontFamily: {
         display: ['Anton', 'Arial Narrow', 'Helvetica Neue', 'system-ui', 'sans-serif'],
-        sans: [
-          'Barlow',
-          'system-ui',
-          '-apple-system',
-          'Segoe UI',
-          'Roboto',
-          'Helvetica',
-          'Arial',
-          'sans-serif',
-        ],
+        sans: ['Familjen Grotesk', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['Martian Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
 
       // Escala tipografica tokenizada (Fase 2 §2.4). Sin tamanos sueltos
       // por componente.
       fontSize: {
-        display: ['var(--text-display)', { lineHeight: '0.82', letterSpacing: '-0.02em' }],
         h1: ['var(--text-h1)', { lineHeight: '1.1' }],
         'h1-desktop': ['var(--text-h1-desktop)', { lineHeight: '1.05' }],
         h2: ['var(--text-h2)', { lineHeight: '1.15' }],
