@@ -9,7 +9,7 @@
  *
  * Carrusel a sangre (16/10/2026, pedido del cliente: "mas grande, que toque
  * el borde y no se le vean los bordes"):
- *   - Desde 1000px la foto ocupa el 60% derecho de la portada completa: del
+ *   - Desde 1000px la foto ocupa el 52% derecho de la portada completa: del
  *     borde derecho de la pantalla y de arriba abajo, sin marco ni esquinas.
  *   - Se desvanece hacia la izquierda: cerca del titulo la foto se funde con
  *     el negro de la pagina, que sigue siendo el fondo de las letras.
@@ -117,7 +117,7 @@ const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
                 <source
                   media={DESDE}
                   srcset={s.foto}
-                  sizes="(min-width: 1000px) 60vw, 100vw"
+                  sizes="(min-width: 1000px) 52vw, 100vw"
                 />
                 <img
                   src={PIXEL}
@@ -282,7 +282,7 @@ const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
     }
   }
 
-  /* Escritorio: el 60% derecho de la portada, de arriba abajo. El texto
+  /* Escritorio: el 52% derecho de la portada, de arriba abajo. El texto
      queda a la izquierda, sobre el negro. */
   @media (min-width: 1000px) {
     .portada {
@@ -314,7 +314,7 @@ const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
       top: 0;
       right: 0;
       bottom: 0;
-      width: 60%;
+      width: 52%;
       height: auto;
       margin: 0;
     }
