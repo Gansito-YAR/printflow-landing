@@ -1,83 +1,123 @@
 ---
 /**
- * Header publico (spec §8.1). Alturas 56px movil / 72px escritorio — NO TOCAR.
- * Superficie oscura de marca: la clase .surface-inverse redefine los tokens
- * de tinta, borde y foco para que todo lo de adentro siga cumpliendo AA.
+ * Header publico (spec §8.1), con el tratamiento de la version aprobada:
+ * fijo arriba, fondo translucido con desenfoque y borde inferior sutil.
  *
- * Fase 2.5 §2.2 — El CTA de WhatsApp del header se retiro. Competia con el
- * del hero: mismo texto, mismo naranja y ambos visibles en la misma pantalla,
- * lo que aplanaba la jerarquia. El enlace "Servicios" queda como la unica
- * accion del header y ahora se muestra tambien en movil, donde antes estaba
- * oculto y el header no ofrecia ninguna via de navegacion.
+ * Alturas 56px movil / 72px escritorio — NO TOCAR. El boceto usaba 64px; se
+ * respeta la spec congelada en su lugar, porque scroll-padding-top y el FAB
+ * dependen de esos dos valores.
  *
- * El logo es PNG con transparencia extraido del material de la imprenta. Al
- * no llevar fondo propio, funciona igual sobre el header y el footer oscuros
- * (Fase 2.5 §3.4.7). El alt va vacio a proposito: el enlace ya lleva
- * aria-label, que gana sobre el contenido, y un alt con el mismo texto haria
- * que un lector de pantalla anunciara el nombre dos veces.
+ * Sin menu hamburguesa (Fase 1 §8.1). En movil quedan el enlace al catalogo
+ * y el boton Cotizar; las secciones completas aparecen desde 900px, que es
+ * donde entran sin apretarse.
  *
- * Conserva el texto "Servicios" a proposito: el hero ya tiene un CTA
- * secundario "Ver servicios", y ambos son visibles a la vez en la primera
- * pantalla. Duplicar el texto reintroduciria la redundancia que este bloque
- * viene a eliminar.
+ * "Cotizar" es un ancla a la seccion de cierre, no un enlace a WhatsApp: el
+ * Bloque 2 de Fase 2.5 dejo la pagina con una jerarquia de CTA fija y un
+ * boton de WhatsApp en el header competiria con el del medidor.
+ *
+ * El logo va con alt vacio a proposito: el enlace ya lleva aria-label, y un
+ * alt con el mismo texto haria que el lector de pantalla lo anunciara dos
+ * veces.
  */
 import { Image } from 'astro:assets';
 import logo from '../assets/logo-imprenta-escalante.png';
-import { CATEGORIAS } from '../data/catalogo';
+import { HAY_UBICACION, SETTINGS } from '../lib/settings';
+
+const secciones = [
+  { href: '#medir', texto: 'Medir', id: 'medir' },
+  { href: '#catalogo', texto: 'Catálogo', id: 'catalogo' },
+  { href: '#proceso', texto: 'Cómo trabajamos', id: 'proceso' },
+  ...(HAY_UBICACION ? [{ href: '#ubicacion', texto: 'Ubicación', id: 'ubicacion' }] : []),
+];
 ---
 
-<header class="surface-inverse border-b border-line-hairline bg-surface-inverse h-space-7 md:h-space-9">
-  <div
-    class="mx-auto flex h-full max-w-container items-center justify-between px-space-2 md:px-space-6"
-  >
-    <a
-      href="/"
-      aria-label="Imprenta Escalante — inicio"
-      data-testid="logo-home-link"
-      class="rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
-    >
-      <Image
-        src={logo}
-        alt=""
-        width={800}
-        height={165}
-        loading="eager"
-        class="h-6 w-auto md:h-8"
-      />
+<header class="top">
+  <div class="wrap top-in">
+    <a href="#top" aria-label={`${SETTINGS.businessName} — inicio`} data-testid="logo-home-link" class="marca">
+      <Image src={logo} alt="" width={800} height={165} widths={[160, 320]} sizes="160px" loading="eager" class="marca-img" />
     </a>
 
-    <nav aria-label="Navegación principal" class="flex items-center gap-space-3">
-      {/* Las cuatro categorias del catalogo, como en la maqueta aprobada.
-          Se ocultan por debajo de lg: no entran en 56px de alto y la §8.1
-          de Fase 1 prohibe el menu hamburguesa. En movil queda el enlace
-          directo a Catalogo, que lleva al indice navegable. */}
+    <nav aria-label="Navegación principal" class="top-nav">
       {
-        CATEGORIAS.map((categoria) => (
-          <a
-            href={`#catalogo-${categoria.id}`}
-            data-testid={`nav-${categoria.id}`}
-            class="hidden items-center rounded-sm text-small font-semibold text-ink-strong underline-offset-4 transition-colors duration-fast hover:text-ink-brand lg:inline-flex"
-          >
-            {categoria.titulo}
+        secciones.map((s) => (
+          <a href={s.href} data-testid={`nav-${s.id}`} class:list={['top-link', s.id !== 'catalogo' && 'solo-ancho']}>
+            {s.texto}
           </a>
         ))
       }
-      <a
-        href="#catalogo"
-        data-testid="nav-catalogo"
-        class="inline-flex items-center rounded-sm text-small font-semibold text-ink-strong underline-offset-4 transition-colors duration-fast hover:text-ink-brand lg:hidden"
-      >
-        Catálogo
-      </a>
-      {/* Ancla interna al CTA del hero, no un quinto enlace a WhatsApp: el
-          Bloque 2 de Fase 2.5 dejo la pagina en cuatro y asi se conserva. */}
-      <a
-        href="#inicio"
-        data-testid="nav-cotizar"
-        class="inline-flex h-10 items-center justify-center rounded-full bg-action-primary px-space-3 font-display text-small uppercase text-action-primary-text transition-colors duration-base hover:bg-action-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2"
-      >
-        Cotizar
-      </a>
+      <a href="#cotizar" data-testid="nav-cotizar" class="btn btn-ppal btn-sm">Cotizar</a>
     </nav>
   </div>
 </header>
+
+<style>
+  .top {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: color-mix(in srgb, var(--surface-0) 86%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    /* Sombra interna y no border-bottom: el borde se sumaba a la altura y
+       el header media 73px en vez de los 72 congelados. */
+    box-shadow: inset 0 -1px 0 var(--border-subtle);
+  }
+
+  .top-in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    height: var(--header-height-mobile);
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-sm);
+  }
+
+  .marca-img {
+    height: 24px;
+    width: auto;
+  }
+
+  .top-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .top-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ink-base);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: color var(--duration-fast) ease;
+  }
+
+  .top-link:hover {
+    color: var(--ink-brand);
+  }
+
+  .solo-ancho {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .top-in {
+      height: var(--header-height-desktop);
+    }
+
+    .marca-img {
+      height: 32px;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .solo-ancho {
+      display: inline;
+    }
+  }
+</style>

@@ -1,127 +1,189 @@
 ---
 /**
- * Footer (spec §8.6). Padding inferior minimo 96px (pb-24) para que el
- * bloque legal nunca quede debajo del FAB. El bloque legal lleva
- * data-wa-footer-guard: el script oculta el FAB mientras colisionen.
+ * Footer (spec §8.6) con el tratamiento de la version aprobada.
  *
- * Superficie oscura de marca: .surface-inverse redefine tinta, borde y foco.
+ * Padding inferior minimo 96px para que el bloque legal nunca quede debajo
+ * del FAB. El bloque legal lleva data-wa-footer-guard: el script oculta el
+ * FAB mientras colisionen.
  *
- * Direccion, horario, contacto y redes los edita el ADMIN en el panel y se
- * hornean en el build (ver lib/settings.ts). Mientras no esten cargados se
- * mantiene el texto neutro: no afirma nada falso y evita los corchetes
- * visibles que prohibe Fase 2 §5.6.
+ * Direccion, horario, contacto y redes salen de business_settings (ver
+ * lib/settings.ts). Lo que no esta cargado muestra el texto neutro de
+ * siempre, que no afirma nada falso. Las redes solo aparecen si son un
+ * perfil: la portada de Instagram a secas no cuenta.
+ *
+ * Se retiro la leyenda "Boceto de direccion · Visualizador a escala" del
+ * boceto: era un rotulo de presentacion, no del sitio.
  */
 import { Image } from 'astro:assets';
 import logo from '../assets/logo-imprenta-escalante.png';
 import { SETTINGS } from '../lib/settings';
 
-const currentYear = new Date().getFullYear();
+const anio = new Date().getFullYear();
 
-/* Enlaces de redes que el ADMIN haya cargado. La URL ya viene saneada desde
-   settings.ts: lo que no empiece con https:// llega como null. */
-const redes = [
-  { etiqueta: 'Instagram', href: SETTINGS.instagramUrl, testId: 'footer-link-instagram' },
-  { etiqueta: 'Facebook', href: SETTINGS.facebookUrl, testId: 'footer-link-facebook' },
-].filter((r): r is { etiqueta: string; href: string; testId: string } => r.href !== null);
+/* Sin direccion cargada: si hay mapa, basta con la ciudad y el enlace de
+   abajo. Mandar a preguntar por WhatsApp teniendo el mapa al lado (o sin
+   WhatsApp configurado) es un callejon sin salida. */
+const direccion =
+  SETTINGS.address ??
+  (SETTINGS.mapsUrl ? 'Mérida, Yucatán.' : 'Consulta nuestra ubicación por WhatsApp.');
 
-const claseEnlace =
-  'rounded-sm text-ink-muted underline-offset-4 transition-colors duration-fast hover:text-ink-inverse hover:underline';
+const enlaces = [
+  { texto: 'Catálogo', href: '#catalogo', externo: false },
+  { texto: 'Cómo trabajamos', href: '#proceso', externo: false },
+  { texto: 'Cotizar', href: '#cotizar', externo: false },
+  ...(SETTINGS.instagramUrl ? [{ texto: 'Instagram', href: SETTINGS.instagramUrl, externo: true }] : []),
+  ...(SETTINGS.facebookUrl ? [{ texto: 'Facebook', href: SETTINGS.facebookUrl, externo: true }] : []),
+];
 ---
 
-<footer
-  class="surface-inverse border-t border-line-hairline bg-surface-inverse pt-space-6 pb-24 md:pt-space-8"
->
-  <div class="mx-auto max-w-container px-space-2 md:px-space-6">
-    <div class="grid grid-cols-1 gap-space-4 md:grid-cols-4 md:gap-space-3">
-      <div>
-        <Image
-          src={logo}
-          alt={SETTINGS.businessName}
-          width={800}
-          height={165}
-          loading="lazy"
-          class="h-8 w-auto"
-        />
-        {
-          SETTINGS.phone && (
-            <p class="mt-space-2 text-small text-ink-muted" data-testid="footer-telefono">
-              {SETTINGS.phone}
-            </p>
-          )
-        }
-        {
-          SETTINGS.email && (
-            <p class="mt-space-1 text-small text-ink-muted" data-testid="footer-correo">
-              {SETTINGS.email}
-            </p>
-          )
-        }
-      </div>
-
-      <div>
-        <h3 class="font-display text-h3 uppercase text-ink-inverse">Dirección</h3>
-        <p class="mt-space-1 text-small text-ink-muted" data-testid="footer-direccion">
-          {SETTINGS.address ?? 'Consulta nuestra ubicación por WhatsApp.'}
-        </p>
-        {
-          SETTINGS.mapsUrl && (
-            <a
-              href={SETTINGS.mapsUrl}
-              data-testid="footer-link-mapa"
-              target="_blank"
-              rel="noopener noreferrer"
-              class:list={['mt-space-1 inline-block text-small', claseEnlace]}
-            >
-              Ver en el mapa
-            </a>
-          )
-        }
-      </div>
-
-      <div>
-        <h3 class="font-display text-h3 uppercase text-ink-inverse">Horario</h3>
-        <p class="mt-space-1 text-small text-ink-muted" data-testid="footer-horario">
-          {SETTINGS.hours ?? 'Consulta nuestro horario de atención por WhatsApp.'}
-        </p>
-      </div>
-
-      <div>
-        <h3 class="font-display text-h3 uppercase text-ink-inverse">Enlaces</h3>
-        <ul class="mt-space-1 flex flex-col gap-space-1 text-small">
-          {
-            redes.map((red) => (
-              <li>
-                <a
-                  href={red.href}
-                  data-testid={red.testId}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class={claseEnlace}
-                >
-                  {red.etiqueta}
-                </a>
-              </li>
-            ))
-          }
-          <li>
-            <a href="#" data-testid="footer-link-privacidad" class={claseEnlace}>
-              Aviso de privacidad
-            </a>
-          </li>
-          <li>
-            <a href="#" data-testid="footer-link-terminos" class={claseEnlace}>
-              Términos y condiciones
-            </a>
-          </li>
-        </ul>
-      </div>
+<footer class="pie-sitio">
+  <div class="wrap pie">
+    <div>
+      <Image src={logo} alt={SETTINGS.businessName} width={800} height={165} widths={[160, 320]} sizes="140px" loading="lazy" class="pie-logo" />
+      <p class="pie-blurb">
+        Impresión de gran formato, vinil, papelería comercial y promocionales en Mérida, Yucatán.
+      </p>
+      {SETTINGS.phone && <p data-testid="footer-telefono">{SETTINGS.phone}</p>}
+      {SETTINGS.email && <p data-testid="footer-correo">{SETTINGS.email}</p>}
     </div>
 
-    <div
-      data-wa-footer-guard
-      class="mt-space-6 border-t border-line-hairline pt-space-3 text-x-small text-ink-muted"
-    >
-      <p>© {currentYear} {SETTINGS.businessName}. Todos los derechos reservados.</p>
+    <div>
+      <h3>Dirección</h3>
+      <p data-testid="footer-direccion">{direccion}</p>
+      {
+        SETTINGS.mapsUrl && (
+          <a href={SETTINGS.mapsUrl} target="_blank" rel="noopener noreferrer" data-testid="footer-link-mapa">
+            Ver en el mapa
+          </a>
+        )
+      }
+      <h3 class="pie-sep">Horario</h3>
+      <p data-testid="footer-horario">{SETTINGS.hours ?? 'Consulta nuestro horario de atención por WhatsApp.'}</p>
+    </div>
+
+    <div>
+      <h3>Enlaces</h3>
+      <ul>
+        {
+          enlaces.map((e) => (
+            <li>
+              {e.externo ? (
+                <a href={e.href} target="_blank" rel="noopener noreferrer">
+                  {e.texto}
+                </a>
+              ) : (
+                <a href={e.href}>{e.texto}</a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </div>
+
+  <div class="wrap pie-legal" data-wa-footer-guard>
+    <span>© {anio} {SETTINGS.businessName}</span>
+    <span class="pie-legal-links">
+      <a href="#" data-testid="footer-link-privacidad">Aviso de privacidad</a>
+      <a href="#" data-testid="footer-link-terminos">Términos y condiciones</a>
+    </span>
+  </div>
 </footer>
+
+<style>
+  .pie-sitio {
+    border-top: 1px solid var(--border-subtle);
+    padding-bottom: 96px;
+  }
+
+  .pie {
+    padding-block: 34px 40px;
+    display: grid;
+    gap: 22px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 760px) {
+    .pie {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .pie-logo {
+    height: 28px;
+    width: auto;
+  }
+
+  .pie-blurb {
+    margin-top: 12px;
+    max-width: 34ch;
+  }
+
+  h3 {
+    font-family: var(--font-mono);
+    font-size: 0.59375rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 0 0 8px;
+  }
+
+  .pie-sep {
+    margin-top: var(--space-2);
+  }
+
+  p,
+  a {
+    font-size: 0.92rem;
+    color: var(--ink-base);
+    text-decoration: none;
+    display: block;
+    margin: 0;
+  }
+
+  a {
+    border-radius: var(--radius-sm);
+    padding-block: 3px;
+  }
+
+  a:hover {
+    color: var(--ink-brand);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pie-legal {
+    border-top: 1px solid var(--border-subtle);
+    padding-block: 16px 30px;
+    font-family: var(--font-mono);
+    font-size: 0.59375rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .pie-legal-links {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .pie-legal a {
+    font-size: inherit;
+    color: var(--ink-muted);
+    display: inline;
+  }
+
+  .pie-legal a:hover {
+    color: var(--ink-brand);
+  }
+</style>

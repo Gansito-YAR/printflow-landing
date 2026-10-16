@@ -5,37 +5,231 @@
 @theme inline {
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
 }
 
 html {
   font-family: var(--font-body);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  /* Las anclas no deben quedar tapadas por el header fijo. */
+  scroll-padding-top: var(--header-height-mobile);
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: var(--header-height-desktop);
+  }
 }
 
 body {
   background-color: var(--surface-0);
   color: var(--ink-base);
+  font-size: 1rem;
+  line-height: 1.55;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /*
  * Foco visible por teclado (Fase 1 §10). El color sale de --focus-ring, que
- * las secciones oscuras redefinen para no perder contraste (Fase 2 §1.2.4).
+ * las secciones de fondo naranja redefinen para no perder contraste.
  */
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
+/* ========================================================================
+ * Piezas compartidas de la version aprobada. Viven aca, no en un
+ * componente, porque las usan varias secciones y repetirlas en cada <style>
+ * scoped haria que cada una derivara por su lado.
+ * ===================================================================== */
+
+/* Sin JavaScript, los controles que dependen de el no se muestran: un boton
+   que no hace nada es peor que no tener el boton. La clase .js la pone un
+   script inline en el <head> del layout. */
+html:not(.js) [data-requiere-js] {
+  display: none !important;
+}
+
+/* Contenedor del boceto: el maximo de la spec mas el margen lateral. */
+.wrap {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Seccion estandar y su cabecera (rotulo + titulo + bajada). */
+.sec {
+  padding-block: clamp(52px, 9vh, 100px);
+}
+
+.sec-cab {
+  display: grid;
+  gap: 13px;
+  margin-bottom: clamp(24px, 4vh, 44px);
+  max-width: 62ch;
+}
+
+/* Rotulo en mono sobre los titulos de seccion. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-brand);
+}
+
+.lead {
+  color: var(--ink-base);
+  max-width: 56ch;
+}
+
+.titulo-seccion {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2rem, 5.5vw, 4rem);
+  /* 1.14 y no el 0.94 del boceto: una mayuscula con tilde en Anton llega a
+     1.11 veces el tamano de la letra sobre su linea base. Con 0.94, la Ó de
+     "A PRODUCCIÓN" se metia en la "Y" del renglon de arriba. */
+  line-height: 1.14;
+  letter-spacing: -0.012em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: var(--ink-strong);
+}
+
 /*
- * Movimiento (Fase 2 §4.3 y §4.4). Transiciones cortas, solo en interaccion.
- * Si el sistema pide menos movimiento, se desactiva todo.
+ * Lugar para las tildes. Anton con interlineado menor a 1 deja que la tilde
+ * de una mayuscula (É, Í, Ó) sobresalga de su renglon: medido, 0.22 veces el
+ * tamano de la letra. Pegado a un rotulo, la tilde caia encima de el (en el
+ * cierre sobre "¿TODAVÍA", en el medidor 4px sobre "ANTES DE COTIZAR").
+ * Se reserva en em para que valga a cualquier tamano de pantalla.
+ */
+.eyebrow + .titulo-seccion,
+.eyebrow + .medidor-titulo {
+  /* 0.13em: el interlineado ya abierto (1.14) absorbe parte de la tilde. */
+  padding-top: 0.13em;
+}
+
+.titulo-seccion em {
+  font-style: normal;
+  color: var(--ink-brand);
+}
+
+/* --- Botones en pildora --- */
+.btn {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-base) ease,
+    color var(--duration-base) ease,
+    border-color var(--duration-base) ease,
+    transform var(--duration-base) ease;
+}
+
+.btn:focus-visible {
+  outline-offset: 3px;
+}
+
+.btn-ppal {
+  background: var(--action-primary-bg);
+  color: var(--action-primary-text);
+  border-color: var(--action-primary-border);
+}
+
+.btn-ppal:hover {
+  background: var(--action-primary-bg-hover);
+  color: var(--action-primary-text-hover);
+  border-color: var(--action-primary-bg-hover);
+  transform: translateY(-2px);
+}
+
+.btn-fant {
+  color: var(--action-secondary-text);
+  border-color: var(--action-secondary-border);
+}
+
+.btn-fant:hover {
+  background: var(--action-primary-bg);
+  color: var(--action-primary-text);
+  border-color: var(--action-primary-bg);
+}
+
+.btn-sm {
+  min-height: 40px;
+  font-size: 0.84375rem;
+  padding-inline: 18px;
+}
+
+/* Estado Disabled de un CTA de WhatsApp sin numero (spec §9.4). */
+.btn-off {
+  background: var(--action-disabled-bg);
+  color: var(--action-disabled-text);
+  border: 2px dashed var(--action-disabled-border);
+  cursor: not-allowed;
+}
+
+/* --- Chips en pildora (medidor y filtros del catalogo) --- */
+.chip {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  /* 44px: lo que recomienda Apple para un dedo. WCAG 2.2 AA pide 24; el
+     publico entra por telefono y la diferencia cuesta 4px. */
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  background: transparent;
+  color: var(--ink-base);
+  border: 1.5px solid var(--border-subtle);
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
+}
+
+.chip:hover {
+  border-color: var(--border-control);
+  color: var(--ink-strong);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--action-primary-bg);
+  color: var(--action-primary-text);
+  border-color: var(--action-primary-bg);
+  transform: translateY(-1px);
+}
+
+/*
+ * Movimiento (Fase 2 §4.3 y §4.4). Si el sistema pide menos movimiento, se
+ * desactiva todo: la palabra que rota, el carrusel y la franja se quedan
+ * quietos en su primer estado.
  */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }

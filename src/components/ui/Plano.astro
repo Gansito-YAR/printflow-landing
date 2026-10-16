@@ -1,0 +1,35 @@
+---
+/**
+ * Plano ilustrativo: cuadricula de calles con un marcador. Decorativo. No es
+ * el plano real del taller ni lo pretende; el enlace a Maps es la fuente de
+ * la ubicacion. Los colores los pone quien lo usa, por clase (calle,
+ * avenida, manzana-on, pin, pin-centro, pulso).
+ */
+const W = 800;
+const H = 500;
+const PASO = 72;
+
+const verticales = Array.from({ length: Math.ceil(W / PASO) + 1 }, (_, i) => i * PASO + 20);
+const horizontales = Array.from({ length: Math.ceil(H / PASO) + 1 }, (_, i) => i * PASO + 14);
+
+/* La manzana marcada y el pin, en el cruce mas cercano al centro. */
+const cx = verticales[Math.floor(verticales.length / 2)];
+const cy = horizontales[Math.floor(horizontales.length / 2)];
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <rect class="manzana-on" x={cx + 4} y={cy - PASO + 4} width={PASO - 8} height={PASO - 8} rx="4"></rect>
+
+  {verticales.map((x) => <line class="calle" x1={x} y1="0" x2={x} y2={H}></line>)}
+  {horizontales.map((y) => <line class="calle" x1="0" y1={y} x2={W} y2={y}></line>)}
+
+  <line class="avenida" x1="0" y1={H * 0.82} x2={W} y2={H * 0.18}></line>
+  <line class="avenida" x1="0" y1={horizontales[1]} x2={W} y2={horizontales[1]}></line>
+
+  <circle class="pulso" cx={cx} cy={cy - 30} r="34"></circle>
+  <path
+    class="pin"
+    d={`M${cx} ${cy} c-4-9-22-24-22-38 a22 22 0 1 1 44 0 c0 14-18 29-22 38Z`}
+  ></path>
+  <circle class="pin-centro" cx={cx} cy={cy - 38} r="7"></circle>
+</svg>

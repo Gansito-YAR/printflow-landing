@@ -1,0 +1,482 @@
+---
+/**
+ * Portada de la version aprobada: "Imprimimos" + una palabra que rota, y a la
+ * derecha un carrusel de trabajos SINCRONIZADO con esa palabra.
+ *
+ * Por que sincronizado y no un carrusel suelto: "Imprimimos LONAS" con la
+ * foto de una lona al lado es la prueba de lo que dice el titulo. Un
+ * carrusel independiente seria decoracion compitiendo con el titulo.
+ *
+ * Por que el carrusel existe: a partir de ~1000px la columna derecha quedaba
+ * vacia (lo que se veia mal en laptop) y se pidio explicitamente un carrusel
+ * en ese lugar.
+ *
+ * Reglas que respeta:
+ *   - Sin recorte. La foto entra completa (object-fit: contain) y detras va
+ *     la misma imagen desenfocada para llenar el marco. Las proporciones van
+ *     de 0.46 a 2.90; recortar era romper la regla del catalogo.
+ *   - Sin JavaScript se lee completo: la primera palabra y la primera foto
+ *     estan en el HTML. El script solo agrega el movimiento.
+ *   - WCAG 2.2.2: todo lo que se mueve solo por mas de 5 segundos necesita
+ *     pausa. Un boton detiene la palabra y el carrusel juntos. La palabra
+ *     del boceto ya rotaba sin control; esto lo corrige.
+ *   - prefers-reduced-motion: no rota nada.
+ *   - En telefono el carrusel no se muestra y sus imagenes no se descargan
+ *     (lazy dentro de un contenedor con display: none).
+ *
+ * Se retiro el isotipo grande que iba arriba del titulo, por pedido del
+ * cliente. El logo sigue en el header.
+ */
+import { getImage } from 'astro:assets';
+import { CATALOGO, CATEGORIAS } from '../data/catalogo';
+
+/* El carrusel solo existe desde 1000px. Las fotos van en <picture> con una
+   fuente limitada a ese ancho: por debajo, el navegador usa el <img> de
+   respaldo, que es este pixel en linea, y NUNCA pide la foto. Se probo antes
+   con loading="lazy" dentro de un contenedor oculto y Chrome descargaba las
+   14 imagenes igual: ~200 KB por visita desde telefono para algo que no se ve. */
+const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const DESDE = '(min-width: 1000px)';
+
+/* Cada palabra apunta a una pieza real del catalogo 2026. */
+const ROTACION = [
+  { palabra: 'lonas', pieza: 'lona-con-bastidor' },
+  { palabra: 'viniles', pieza: 'vinil-para-cristales-y-ventanas' },
+  { palabra: 'letreros', pieza: 'letras-luminosas' },
+  { palabra: 'menús', pieza: 'menus' },
+  { palabra: 'playeras', pieza: 'serigrafia' },
+  { palabra: 'calendarios', pieza: 'calendarios' },
+  { palabra: 'stands', pieza: 'stands-y-banderines' },
+] as const;
+
+const slides = await Promise.all(
+  ROTACION.map(async ({ palabra, pieza }) => {
+    const item = CATALOGO.find((x) => x.id === pieza);
+    if (!item) throw new Error(`Portada: no existe la pieza "${pieza}" en el catalogo.`);
+    const familia = CATEGORIAS.find((c) => c.id === item.categoria)?.titulo ?? '';
+    const [foto, fondo] = await Promise.all([
+      getImage({ src: item.image, widths: [480, 720, item.width], format: 'webp' }),
+      getImage({ src: item.image, width: 320, format: 'webp' }),
+    ]);
+    return { palabra, item, familia, foto: foto.srcSet.attribute, fondo: fondo.src };
+  }),
+);
+
+const primera = slides[0];
+const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendarios y stands.';
+---
+
+<section class="portada" id="top" data-testid="portada">
+  <div class="wrap portada-grid">
+    <div class="portada-texto">
+      <p class="eyebrow">Imprenta Escalante · Mérida, Yucatán</p>
+
+      <h1 class="decir">
+        <span class="fijo">Imprimimos</span>
+        <span class="rota" data-rota aria-hidden="true"><span>{primera.palabra}</span></span>
+        <span class="sr-only">{lectura}</span>
+      </h1>
+
+      <div class="portada-pie">
+        <p class="lead">
+          Gran formato, vinil, papelería comercial y promocionales. Lo que tu marca necesita
+          para verse en la calle, en el mostrador y en las manos de tus clientes.
+        </p>
+        {/* Un solo boton: el medidor esta justo debajo y no necesita un enlace
+            que baje 300px. Este lleva a donde el scroll no te deja. */}
+        <div>
+          <a class="btn btn-fant" href="#catalogo" data-testid="portada-catalogo">Ver el catálogo completo</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="carrusel" data-carrusel aria-roledescription="carrusel" aria-label="Trabajos de la imprenta" role="region">
+      <div class="carrusel-marco">
+        {
+          slides.map((s, i) => (
+            <figure
+              class:list={['slide', i === 0 && 'is-on']}
+              data-slide={i}
+              data-palabra={s.palabra}
+              aria-roledescription="diapositiva"
+              aria-label={`${i + 1} de ${slides.length}: ${s.item.titulo}`}
+              aria-hidden={i === 0 ? undefined : 'true'}
+            >
+              <picture>
+                <source media={DESDE} srcset={s.fondo} />
+                <img src={PIXEL} alt="" aria-hidden="true" class="slide-fondo" decoding="async" />
+              </picture>
+              <picture>
+                <source media={DESDE} srcset={s.foto} sizes="(min-width: 1344px) 560px, 42vw" />
+                <img
+                  src={PIXEL}
+                  alt={s.item.alt}
+                  width={s.item.width}
+                  height={s.item.height}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={i === 0 ? 'high' : 'low'}
+                  decoding="async"
+                  class="slide-img"
+                />
+              </picture>
+              <figcaption class="slide-cap">
+                <b>{s.item.titulo}</b>
+                <span>{s.familia}</span>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+
+      <div class="carrusel-pie">
+        <ol class="marcas" aria-hidden="true">
+          {slides.map((_, i) => <li class:list={['marca-slide', i === 0 && 'is-on']} />)}
+        </ol>
+        {/* Control de pausa (WCAG 2.2.2): un icono chico junto a las marcas,
+            como en cualquier carrusel. Antes era un boton con texto al lado del
+            CTA y el cliente lo pidio fuera de la portada. Detiene la palabra,
+            el carrusel y la franja. Nace oculto: sin JS no hay nada que pausar.
+            En telefono el carrusel no se muestra y no queda control visible;
+            ahi se respeta prefers-reduced-motion. */}
+        <button type="button" class="pausa" data-pausa aria-pressed="false" aria-label="Pausar animación" hidden>
+          <svg class="ico-pausa" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <rect x="6" y="5" width="4" height="14" rx="1"></rect>
+            <rect x="14" y="5" width="4" height="14" rx="1"></rect>
+          </svg>
+          <svg class="ico-play" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .portada {
+    padding-block: clamp(40px, 9vh, 96px) clamp(34px, 7vh, 76px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .portada-grid {
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  .decir {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 0.86;
+    letter-spacing: -0.02em;
+    font-size: clamp(2.6rem, 11vw, 7.5rem);
+    margin: var(--space-2) 0 0;
+  }
+
+  .fijo {
+    display: block;
+    color: var(--ink-strong);
+  }
+
+  .rota {
+    display: block;
+    color: var(--ink-brand);
+    /* Lugar para la tilde de "menús": con el interlineado de 0.86 la Ú
+       chocaba con "IMPRIMIMOS". 1.11 (alto de la tilde) - 0.86 + aire. */
+    padding-top: 0.28em;
+    min-height: 1em;
+    white-space: nowrap;
+  }
+
+  .rota :global(span) {
+    display: inline-block;
+    animation: subir 0.5s var(--ease-out) both;
+  }
+
+  @keyframes subir {
+    from {
+      opacity: 0;
+      transform: translateY(0.42em);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .portada-pie {
+    margin-top: clamp(22px, 4vh, 40px);
+    display: grid;
+    gap: clamp(18px, 3vw, 30px);
+  }
+
+  /* --- Carrusel: solo donde hay columna para el --- */
+  .carrusel {
+    display: none;
+  }
+
+  @media (min-width: 1000px) {
+    .portada-grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      gap: clamp(32px, 4vw, 64px);
+    }
+
+    /* Con dos columnas el titulo se dimensiona por la columna, no por la
+       pantalla: "calendarios" a 11vw desbordaba la mitad izquierda. */
+    .decir {
+      font-size: clamp(3rem, 6.4vw, 7.5rem);
+    }
+
+    /* Pegado al borde derecho del contenido: el marco suele quedar mas
+       angosto que su columna, y alineado a la izquierda dejaba 144px de
+       margen derecho contra 52 del izquierdo (medido a 1366px). */
+    .carrusel {
+      display: grid;
+      gap: var(--space-2);
+      justify-items: end;
+    }
+  }
+
+  .carrusel-marco {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    /* Ancho explicito: los hijos son absolutos y no le dan tamano, asi que
+       alineado a la derecha sin ancho colapsaba a 2px. 46.4vh = 58vh de alto
+       por la proporcion 4:5. Con 58vh, en una laptop de 768px de alto la
+       portada entera (aviso, header, titulo y carrusel) entra en la primera
+       pantalla; con el 70vh original no entraba. */
+    width: min(100%, 46.4vh);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    /* Mismo tiempo que la palabra (0.5s): si la foto tarda mas, por un
+       instante el titulo y la imagen no coinciden. */
+    transition: opacity 0.5s var(--ease-out);
+  }
+
+  .slide.is-on {
+    opacity: 1;
+  }
+
+  /* <picture> no debe crear caja propia: la imagen se dimensiona contra la
+     diapositiva, no contra un contenedor inline sin alto. */
+  .slide picture {
+    display: contents;
+  }
+
+  /* La misma foto, desenfocada y oscurecida, llena el marco por detras. La
+     foto real va encima completa: nada se recorta. */
+  .slide-fondo {
+    position: absolute;
+    inset: -8%;
+    width: 116%;
+    height: 116%;
+    object-fit: cover;
+    filter: blur(28px) brightness(0.45) saturate(1.1);
+  }
+
+  .slide-img {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: var(--space-3) var(--space-3) var(--space-8);
+  }
+
+  .slide-cap {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    padding: var(--space-5) var(--space-3) var(--space-2);
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--surface-0) 92%, transparent) 55%);
+    display: grid;
+    gap: 2px;
+  }
+
+  .slide-cap b {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    color: var(--ink-strong);
+  }
+
+  .slide-cap span {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-brand);
+  }
+
+  /* Mismo ancho que el marco, para que el icono quede alineado a su borde. */
+  .carrusel-pie {
+    width: min(100%, 46.4vh);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .marcas {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .marca-slide {
+    width: 18px;
+    height: 3px;
+    border-radius: var(--radius-pill);
+    background: var(--border-hairline);
+    transition:
+      background-color var(--duration-base) ease,
+      width var(--duration-base) ease;
+  }
+
+  .marca-slide.is-on {
+    width: 32px;
+    background: var(--ink-brand);
+  }
+
+  /* Icono discreto: 32px, por encima de los 24 que pide WCAG 2.2 AA. */
+  .pausa {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1px solid var(--border-hairline);
+    border-radius: 50%;
+    cursor: pointer;
+    transition:
+      color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
+  }
+
+  .pausa:hover {
+    color: var(--ink-strong);
+    border-color: var(--border-control);
+  }
+
+  .pausa svg {
+    fill: currentColor;
+  }
+
+  .pausa .ico-play,
+  .pausa[aria-pressed='true'] .ico-pausa {
+    display: none;
+  }
+
+  .pausa[aria-pressed='true'] .ico-play {
+    display: block;
+  }
+</style>
+
+<script>
+  const INTERVALO_MS = 2800;
+
+  const caja = document.querySelector<HTMLElement>('[data-rota]');
+  const carrusel = document.querySelector<HTMLElement>('[data-carrusel]');
+  const slides = Array.from(document.querySelectorAll<HTMLElement>('[data-slide]'));
+  const marcas = Array.from(document.querySelectorAll<HTMLElement>('.marca-slide'));
+  const pausa = document.querySelector<HTMLButtonElement>('[data-pausa]');
+  const reduceMov = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (caja && slides.length > 1 && !reduceMov) {
+    let i = 0;
+    let timer: number | undefined;
+    let pausadoPorUsuario = false;
+    let encima = false; // mouse o foco de teclado sobre el carrusel
+    let visible = true;
+
+    const mostrar = (n: number): void => {
+      i = n;
+      const palabra = slides[i].dataset.palabra ?? '';
+      const span = document.createElement('span');
+      span.textContent = palabra;
+      caja.replaceChildren(span);
+      slides.forEach((s, k) => {
+        s.classList.toggle('is-on', k === i);
+        if (k === i) s.removeAttribute('aria-hidden');
+        else s.setAttribute('aria-hidden', 'true');
+      });
+      marcas.forEach((m, k) => m.classList.toggle('is-on', k === i));
+    };
+
+    const arrancar = (): void => {
+      if (timer !== undefined || pausadoPorUsuario || encima || !visible || document.hidden) return;
+      timer = window.setInterval(() => mostrar((i + 1) % slides.length), INTERVALO_MS);
+    };
+
+    const detener = (): void => {
+      if (timer !== undefined) window.clearInterval(timer);
+      timer = undefined;
+    };
+
+    if (pausa) {
+      pausa.hidden = false;
+      /* La franja solo se anima cuando existe este control: sin JS, o sin el
+         boton, se queda quieta en vez de moverse sin forma de pararla. */
+      document.documentElement.classList.add('anim-ok');
+      pausa.addEventListener('click', () => {
+        pausadoPorUsuario = !pausadoPorUsuario;
+        pausa.setAttribute('aria-pressed', String(pausadoPorUsuario));
+        pausa.setAttribute('aria-label', pausadoPorUsuario ? 'Reanudar animación' : 'Pausar animación');
+        /* La franja de palabras escucha esta clase para detenerse tambien. */
+        document.documentElement.classList.toggle('anim-pausada', pausadoPorUsuario);
+        if (pausadoPorUsuario) detener();
+        else arrancar();
+      });
+    }
+
+    /* Pausa mientras el mouse o el foco de teclado estan sobre el carrusel:
+       quien se detiene a mirar una foto no quiere que se le cambie. */
+    if (carrusel) {
+      const entrar = (): void => {
+        encima = true;
+        detener();
+      };
+      const salir = (): void => {
+        encima = false;
+        arrancar();
+      };
+      carrusel.addEventListener('mouseenter', entrar);
+      carrusel.addEventListener('mouseleave', salir);
+      carrusel.addEventListener('focusin', entrar);
+      carrusel.addEventListener('focusout', (e) => {
+        if (!carrusel.contains(e.relatedTarget as Node | null)) salir();
+      });
+    }
+
+    /* No gasta bateria rotando lo que nadie ve: se detiene con la pestana
+       oculta y cuando la portada sale de pantalla. */
+    document.addEventListener('visibilitychange', () => (document.hidden ? detener() : arrancar()));
+
+    if ('IntersectionObserver' in window && carrusel) {
+      new IntersectionObserver(([e]) => {
+        visible = e.isIntersecting;
+        if (visible) arrancar();
+        else detener();
+      }).observe(carrusel.closest('section') ?? carrusel);
+    }
+
+    arrancar();
+  }
+</script>

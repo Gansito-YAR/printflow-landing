@@ -1,0 +1,202 @@
+---
+/**
+ * Ubicacion del taller. Pedido del cliente: "un mapa donde muestre nuestra
+ * ubicacion o un boton que los redirija", a eleccion.
+ *
+ * Se eligio BOTON + ilustracion, no un mapa de Google embebido:
+ *
+ *   - Un iframe de Google Maps carga ~1 MB de JavaScript de terceros en cada
+ *     visita, deja cookies y manda la IP del visitante a Google sin que haya
+ *     tocado nada. Rompe AGENTS 16 (cero requests) y se come el presupuesto
+ *     de peso de la primera carga.
+ *   - En telefono, un mapa embebido es una caja chica que hay que pellizcar.
+ *     El boton abre la app de Maps con navegacion: quien busca la imprenta
+ *     desde el celular quiere que lo lleven, no mirar un mapa.
+ *
+ * La ilustracion es una cuadricula de calles con un marcador: decorativa
+ * (aria-hidden) y sin pretender ser el plano real. Merida es literalmente
+ * una cuadricula de calles numeradas, y eso es todo lo que afirma.
+ *
+ * Todo sale de business_settings: el enlace (landing_maps_url), la
+ * direccion y el horario. Lo que el ADMIN no cargo no se dibuja, y si no hay
+ * nada la seccion entera no existe (ver HAY_UBICACION).
+ *
+ * El pulso del marcador corre tres veces y se detiene: menos de 5 segundos,
+ * asi no necesita control de pausa (WCAG 2.2.2).
+ */
+import Plano from './ui/Plano.astro';
+import { HAY_UBICACION, SETTINGS } from '../lib/settings';
+
+const { mapsUrl, address, hours } = SETTINGS;
+---
+
+{
+  HAY_UBICACION && (
+    <section class="sec" id="ubicacion" data-testid="ubicacion">
+      <div class="wrap ubic">
+        <div class="ubic-texto">
+          <p class="eyebrow">Ubicación</p>
+          <h2 class="titulo-seccion">
+            Visítanos <em>en el taller</em>
+          </h2>
+
+          <dl class="datos">
+            {address && (
+              <div>
+                <dt>Dirección</dt>
+                <dd data-testid="ubicacion-direccion">{address}</dd>
+              </div>
+            )}
+            {hours && (
+              <div>
+                <dt>Horario</dt>
+                <dd data-testid="ubicacion-horario">{hours}</dd>
+              </div>
+            )}
+            {!address && (
+              <div>
+                <dt>Dirección</dt>
+                <dd>Mérida, Yucatán. {mapsUrl ? 'Toca el botón para ver cómo llegar.' : 'Pregúntanos por WhatsApp.'}</dd>
+              </div>
+            )}
+          </dl>
+
+          {mapsUrl && (
+            <a
+              class="btn btn-ppal"
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="ubicacion-mapa"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" />
+                <circle cx="12" cy="10" r="2.6" />
+              </svg>
+              Cómo llegar
+            </a>
+          )}
+        </div>
+
+        {/* La ilustracion tambien abre el mapa, como blanco grande para el
+            mouse o el dedo. Fuera del orden de tabulacion: el boton ya es el
+            enlace accesible y repetirlo seria una parada de teclado de mas. */}
+        {mapsUrl ? (
+          <a class="plano" href={mapsUrl} target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true">
+            <Plano />
+          </a>
+        ) : (
+          <div class="plano" aria-hidden="true">
+            <Plano />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .ubic {
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  @media (min-width: 860px) {
+    .ubic {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: clamp(32px, 5vw, 72px);
+    }
+  }
+
+  .ubic-texto {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+  }
+
+  .datos {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+  }
+
+  .datos dt {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .datos dd {
+    margin: 4px 0 0;
+    font-size: 1.05rem;
+    color: var(--ink-strong);
+  }
+
+  .plano {
+    display: block;
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    transition: border-color var(--duration-base) ease;
+  }
+
+  a.plano:hover {
+    border-color: var(--border-brand);
+  }
+
+  .plano :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .plano :global(.calle) {
+    stroke: var(--border-hairline);
+    stroke-width: 2;
+  }
+
+  /* Las avenidas un escalon mas claras que las calles: si comparten color,
+     la cuadricula se lee como una trama plana y no como un plano. */
+  .plano :global(.avenida) {
+    stroke: var(--viz-figure);
+    stroke-width: 8;
+  }
+
+  .plano :global(.manzana-on) {
+    fill: color-mix(in srgb, var(--ink-brand) 16%, transparent);
+  }
+
+  .plano :global(.pin) {
+    fill: var(--ink-brand);
+  }
+
+  .plano :global(.pin-centro) {
+    fill: var(--surface-0);
+  }
+
+  .plano :global(.pulso) {
+    fill: none;
+    stroke: var(--ink-brand);
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pulso 1.6s ease-out 3;
+  }
+
+  @keyframes pulso {
+    from {
+      opacity: 0.9;
+      transform: scale(0.4);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.6);
+    }
+  }
+</style>

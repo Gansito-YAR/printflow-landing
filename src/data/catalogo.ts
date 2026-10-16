@@ -52,6 +52,11 @@ export interface ItemCatalogo {
   descripcion?: string;
   image: ImageMetadata;
   alt: string;
+  /**
+   * Tecnicas y acabados tal como los lista el catalogo 2026 del cliente.
+   * Solo donde el catalogo los da: no se completan los que faltan.
+   */
+  tecnicas?: string;
   /** Medidas reales del archivo. No inventar ni redondear. */
   width: number;
   height: number;
@@ -154,6 +159,7 @@ export const CATALOGO: readonly ItemCatalogo[] = [
   },
   {
     id: 'vinil-para-cristales-y-ventanas',
+    tecnicas: 'Impreso · Transparente · Microperforado',
     categoria: 'vinil',
     titulo: 'Vinil para cristales y ventanas',
     image: vinilParaCristalesYVentanasImg,
@@ -163,6 +169,7 @@ export const CATALOGO: readonly ItemCatalogo[] = [
   },
   {
     id: 'vinil-corte-registro-y-etiquetas',
+    tecnicas: 'Reflejante · Transparente',
     categoria: 'vinil',
     titulo: 'Vinil corte registro y etiquetas',
     descripcion: 'Stickers y etiquetas con la forma exacta de tu diseño.',
@@ -211,6 +218,7 @@ export const CATALOGO: readonly ItemCatalogo[] = [
   },
   {
     id: 'menus',
+    tecnicas: 'Enmicados · Barnizados · Laminados · Vinil impreso',
     categoria: 'impresion',
     titulo: 'Menús',
     image: menusImg,
@@ -229,6 +237,7 @@ export const CATALOGO: readonly ItemCatalogo[] = [
   },
   {
     id: 'barniz-uv-y-laminado',
+    tecnicas: 'Mate · Brillante',
     categoria: 'impresion',
     titulo: 'Barniz UV y laminado',
     descripcion: 'Acabado mate o brillante para que tus tarjetas se sientan distintas.',
@@ -239,6 +248,7 @@ export const CATALOGO: readonly ItemCatalogo[] = [
   },
   {
     id: 'serigrafia',
+    tecnicas: 'Serigrafía · DTF · Bordados · Grabado láser',
     categoria: 'personalizados',
     titulo: 'Serigrafía',
     descripcion: 'Playeras, sudaderas, bolsas y gorras con tu diseño.',
@@ -249,6 +259,7 @@ export const CATALOGO: readonly ItemCatalogo[] = [
   },
   {
     id: 'grabado-laser-y-bordados',
+    tecnicas: 'Bordado · Grabado láser',
     categoria: 'personalizados',
     titulo: 'Grabado láser y bordados',
     image: grabadoLaserYBordadosImg,
@@ -277,6 +288,7 @@ export const CATALOGO: readonly ItemCatalogo[] = [
   },
   {
     id: 'stands-y-banderines',
+    tecnicas: 'Stands · Banderines',
     categoria: 'personalizados',
     titulo: 'Stands y banderines',
     image: standsYBanderinesImg,

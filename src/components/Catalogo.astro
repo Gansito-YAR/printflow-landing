@@ -1,0 +1,256 @@
+---
+/**
+ * Catalogo 2026 con el tratamiento de la version aprobada: filtros por
+ * familia en pildora y galeria en columnas.
+ *
+ * Diferencias con el boceto, a proposito:
+ *
+ *   1. Las 21 piezas, no 12. El boceto mostraba una seleccion; la landing
+ *      tiene el catalogo completo con sus imagenes optimizadas.
+ *
+ *   2. El rotulo va DEBAJO de la foto, no encima con un degradado. En
+ *      telefono la galeria va a dos columnas (lo que bajo un 38% el alto de
+ *      la pagina) y una pieza apaisada mide ~56px de alto: un rotulo encima
+ *      la taparia entera. Seria recortar por otra via.
+ *
+ *   3. Las tecnicas del catalogo 2026 (microperforado, DTF, mate/brillante...)
+ *      aparecen en cada pieza que las tiene. El cliente las marco como muy
+ *      importantes y la landing anterior no las mostraba.
+ *
+ *   4. Un CTA de WhatsApp al pie que sigue al filtro: "Cotizar del catalogo"
+ *      o, filtrado, "Cotizar publicidad exterior". Conserva la ubicacion
+ *      'catalog' de la jerarquia de CTA de Fase 2.5 sin poner un boton en
+ *      cada pieza. Sin JS queda el general, que funciona igual.
+ *
+ * Columnas y no grilla: las proporciones van de 0.46 a 2.90 y una grilla
+ * estira cada fila al alto de su pieza mas alta, dejando huecos muertos.
+ * Nada se recorta: cada foto lleva su ancho y alto reales.
+ */
+import { Image } from 'astro:assets';
+import { CATALOGO, CATEGORIAS } from '../data/catalogo';
+import { SERVICES } from '../data/services';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+const familia = (id: string) => CATEGORIAS.find((c) => c.id === id)?.titulo ?? '';
+
+/* El CTA general (sin filtro) y el de cada familia. Se calculan en el build
+   con el contrato congelado; el script solo elige cual mostrar. */
+const ctaGeneral = buildWhatsappHref('Cotización del catálogo', 'general', 'catalog');
+const ctasFamilia = CATEGORIAS.map((c) => ({
+  id: c.id,
+  texto: `Cotizar ${c.titulo.toLowerCase()}`,
+  href: buildWhatsappHref(
+    `${SERVICES.find((s) => s.id === c.servicio)?.label ?? c.titulo} — ${c.titulo}`,
+    c.servicio,
+    'catalog',
+  ),
+}));
+---
+
+<section class="sec" id="catalogo" data-testid="catalogo">
+  <div class="wrap">
+    <div class="sec-cab">
+      <p class="eyebrow">Catálogo 2026</p>
+      <h2 class="titulo-seccion">Todo sale <em>del mismo taller</em></h2>
+      <p class="lead">
+        {CATALOGO.length} productos en {CATEGORIAS.length} familias. Filtra y mira lo que ya se
+        imprimió.
+      </p>
+    </div>
+
+    <div class="filtros" role="group" aria-label="Filtrar catálogo" data-requiere-js data-filtros>
+      <button type="button" class="chip" data-filtro="todo" aria-pressed="true">Todo</button>
+      {
+        CATEGORIAS.map((c) => (
+          <button type="button" class="chip" data-filtro={c.id} aria-pressed="false">
+            {c.titulo}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="galeria" data-galeria>
+      {
+        CATALOGO.map((item) => (
+          <figure class="pieza" data-familia={item.categoria} data-testid={`catalogo-item-${item.id}`}>
+            <Image
+              src={item.image}
+              alt={item.alt}
+              width={item.width}
+              height={item.height}
+              widths={[320, 480, 720]}
+              sizes="(min-width: 1344px) 400px, (min-width: 1000px) 31vw, 46vw"
+              loading="lazy"
+              decoding="async"
+              class="pieza-img"
+            />
+            <figcaption class="pieza-cap">
+              <span class="pieza-fam">{familia(item.categoria)}</span>
+              <b class="pieza-nom">{item.titulo}</b>
+              {item.tecnicas && <span class="pieza-tec">{item.tecnicas}</span>}
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+
+    <div class="catalogo-pie">
+      {
+        ctaGeneral ? (
+          <a
+            class="btn btn-ppal"
+            id="cta-catalogo"
+            href={ctaGeneral}
+            data-wa-link
+            data-cta-catalogo
+            data-testid="cta-catalogo"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span data-wa-label>Cotizar del catálogo</span>
+          </a>
+        ) : (
+          <span class="btn btn-off" aria-disabled="true" title="Contacto no disponible por el momento">
+            Contacto no disponible
+          </span>
+        )
+      }
+    </div>
+
+    {/* Los enlaces de cada familia viajan en el HTML para que el script no
+        tenga que armar ninguna URL: solo intercambia una por otra. */}
+    <template data-ctas-familia>
+      {ctasFamilia.map((c) => c.href && <a data-familia={c.id} href={c.href}>{c.texto}</a>)}
+    </template>
+  </div>
+</section>
+
+<style>
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-bottom: 22px;
+  }
+
+  .galeria {
+    columns: 2;
+    column-gap: 12px;
+  }
+
+  @media (min-width: 1000px) {
+    .galeria {
+      columns: 3;
+      column-gap: 14px;
+    }
+  }
+
+  .pieza {
+    break-inside: avoid;
+    margin: 0 0 12px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    transition:
+      border-color var(--duration-base) ease,
+      transform var(--duration-base) ease;
+  }
+
+  .pieza:hover {
+    border-color: var(--border-brand);
+    transform: translateY(-4px);
+  }
+
+  .pieza[hidden] {
+    display: none;
+  }
+
+  .pieza-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .pieza-cap {
+    display: grid;
+    gap: 4px;
+    padding: 10px 12px 12px;
+  }
+
+  .pieza-fam {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-brand);
+  }
+
+  .pieza-nom {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--ink-strong);
+  }
+
+  .pieza-tec {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-base);
+  }
+
+  @media (min-width: 1000px) {
+    .pieza-cap {
+      padding: 12px 16px 14px;
+    }
+
+    .pieza-fam,
+    .pieza-tec {
+      font-size: 0.625rem;
+    }
+  }
+
+  .catalogo-pie {
+    margin-top: var(--space-4);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+</style>
+
+<script>
+  const filtros = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-filtro]'));
+  const piezas = Array.from(document.querySelectorAll<HTMLElement>('[data-galeria] [data-familia]'));
+  const cta = document.querySelector<HTMLAnchorElement>('[data-cta-catalogo]');
+  const ctaTexto = cta?.querySelector<HTMLElement>('[data-wa-label]');
+  const plantilla = document.querySelector<HTMLTemplateElement>('[data-ctas-familia]');
+
+  const general = cta ? { href: cta.href, texto: ctaTexto?.textContent ?? '' } : null;
+  const porFamilia = new Map<string, { href: string; texto: string }>();
+  plantilla?.content.querySelectorAll<HTMLAnchorElement>('a[data-familia]').forEach((a) => {
+    porFamilia.set(a.dataset.familia ?? '', { href: a.href, texto: a.textContent ?? '' });
+  });
+
+  filtros.forEach((boton) => {
+    boton.addEventListener('click', () => {
+      const id = boton.dataset.filtro ?? 'todo';
+      filtros.forEach((b) => b.setAttribute('aria-pressed', String(b === boton)));
+      piezas.forEach((p) => {
+        p.hidden = id !== 'todo' && p.dataset.familia !== id;
+      });
+
+      const destino = id === 'todo' ? general : (porFamilia.get(id) ?? general);
+      if (cta && ctaTexto && destino) {
+        cta.href = destino.href;
+        ctaTexto.textContent = destino.texto;
+      }
+    });
+  });
+</script>

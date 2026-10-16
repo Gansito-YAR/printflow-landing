@@ -4,14 +4,15 @@
  * fonts.googleapis.com, lo que costaba dos conexiones a un tercero antes de
  * pintar texto con la fuente final y enviaba la IP de cada visitante a Google.
  * Solo el subconjunto latin y solo los pesos EN USO: Anton 400 para display,
- * Barlow 400 y 600 para cuerpo. @fontsource ya declara font-display: swap.
- *
- * Barlow 700 se retiro: ningun componente usa font-bold, asi que solo sumaba
- * 22 KB al bundle sin llegar a descargarse nunca.
+ * Familjen Grotesk 400/500/600/700 para cuerpo y Martian Mono 400 para datos.
+ * @fontsource ya declara font-display: swap.
  */
 import '@fontsource/anton/latin-400.css';
-import '@fontsource/barlow/latin-400.css';
-import '@fontsource/barlow/latin-600.css';
+import '@fontsource/familjen-grotesk/latin-400.css';
+import '@fontsource/familjen-grotesk/latin-500.css';
+import '@fontsource/familjen-grotesk/latin-600.css';
+import '@fontsource/familjen-grotesk/latin-700.css';
+import '@fontsource/martian-mono/latin-400.css';
 import '../styles/global.css';
 
 interface Props {
@@ -40,6 +41,11 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    {/* Marca que el JavaScript corre, ANTES de pintar: los controles que lo
+        necesitan (chips del medidor, filtros, deslizador) se ocultan si no
+        corre, en vez de quedar como botones que no hacen nada. Inline y sin
+        red: no es una request. */}
+    <script is:inline>document.documentElement.classList.add('js');</script>
     <link rel="icon" type="image/png" sizes="256x256" href="/favicon-256.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="description" content={description} />

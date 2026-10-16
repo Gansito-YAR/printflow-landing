@@ -1,0 +1,126 @@
+---
+/**
+ * Cierre en bloque naranja (ancla #cotizar, a donde lleva el boton del
+ * header).
+ *
+ * No repite el boton del medidor: atiende a quien bajo sin medir nada, que
+ * es otro estado y necesita otra salida. Por eso su mensaje dice que todavia
+ * no hay medida, en vez de mandar una que la persona no tiene.
+ *
+ * El mensaje respeta el formato congelado (Fase 2.5 §3.4); el boceto usaba
+ * un texto propio y un wa.me/ sin numero.
+ *
+ * Instagram solo aparece si el ADMIN cargo un perfil real en el panel:
+ * settings.ts descarta la portada de la red ("instagram.com/" a secas). El
+ * boceto lo tenia escrito a mano.
+ *
+ * Sobre naranja, el anillo de foco naranja desaparece: se redefine a negro.
+ */
+import { SETTINGS } from '../lib/settings';
+import { buildWhatsappHref } from '../lib/whatsapp';
+
+const href = buildWhatsappHref('un trabajo, todavía sin la medida', 'general', 'trust');
+const instagram = SETTINGS.instagramUrl;
+---
+
+<section class="sec cierre" id="cotizar" data-testid="cierre">
+  <div class="wrap">
+    <p class="eyebrow">¿Todavía no sabes la medida?</p>
+    <h2 class="titulo-seccion">Cuéntanos qué<br />necesitas y te<br />ayudamos a calcularla</h2>
+    <p class="lead cierre-lead">
+      Describe el trabajo como puedas. Con una foto del lugar o una referencia alcanza para darte
+      la medida y el precio.
+    </p>
+
+    <div class="cierre-acciones">
+      {
+        href ? (
+          <a
+            class="btn btn-ppal"
+            id="cta-cierre"
+            href={href}
+            data-wa-link
+            data-testid="cta-cierre"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span data-wa-label>Escribir por WhatsApp</span>
+          </a>
+        ) : (
+          <span class="btn btn-off" aria-disabled="true" title="Contacto no disponible por el momento">
+            Contacto no disponible
+          </span>
+        )
+      }
+      {
+        instagram && (
+          <a class="btn btn-fant" href={instagram} target="_blank" rel="noopener noreferrer" data-testid="cta-instagram">
+            Escribir por Instagram
+          </a>
+        )
+      }
+    </div>
+
+    <p class="cierre-nota">Pregunta por nuestras promociones del mes.</p>
+  </div>
+</section>
+
+<style>
+  .cierre {
+    background: var(--surface-brand);
+    color: var(--ink-onBrand);
+    --focus-ring: var(--focus-ring-on-brand);
+  }
+
+  .cierre .eyebrow,
+  .cierre .titulo-seccion {
+    color: var(--ink-onBrand);
+  }
+
+  /* El lugar de la tilde lo reserva global.css (padding en em). Este margen
+     es solo el aire entre rotulo y titulo, el mismo que deja .sec-cab. */
+  .cierre .titulo-seccion {
+    margin-top: 13px;
+  }
+
+  .cierre-lead {
+    margin-top: var(--space-2);
+    color: var(--ink-onBrand);
+  }
+
+  .cierre-acciones {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Sobre naranja, los botones se invierten: el primario es negro. */
+  .cierre .btn-ppal {
+    background: var(--ink-onBrand);
+    color: var(--ink-strong);
+    border-color: var(--ink-onBrand);
+  }
+
+  .cierre .btn-ppal:hover {
+    background: var(--ink-strong);
+    color: var(--ink-onBrand);
+    border-color: var(--ink-strong);
+  }
+
+  .cierre .btn-fant {
+    color: var(--ink-onBrand);
+    border-color: var(--ink-onBrand);
+  }
+
+  .cierre .btn-fant:hover {
+    background: var(--ink-onBrand);
+    color: var(--ink-strong);
+  }
+
+  .cierre-nota {
+    margin-top: 18px;
+    font-size: 0.92rem;
+    color: var(--ink-onBrand);
+  }
+</style>

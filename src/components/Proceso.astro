@@ -1,0 +1,219 @@
+---
+/**
+ * Cifras + "Como trabajamos" (spec §8.5), con el tratamiento de la version
+ * aprobada.
+ *
+ * Las cifras salen de los datos, no se escriben a mano:
+ *   - familias y productos: del catalogo;
+ *   - anticipo: de business_settings.deposit_pct, lo que edita el ADMIN.
+ *
+ * La cuarta cifra del boceto era "5 min · Respuesta del bot" y SE RETIRO: no
+ * tiene fuente. El unico "5 minutos" de la documentacion es un limite
+ * anti-spam ("mas de 15 mensajes en menos de 5 minutos"), no un tiempo de
+ * respuesta. Prometerlo en la pagina publica seria inventar un compromiso del
+ * negocio. Su lugar lo toma "3 pasos a produccion", que es exactamente lo
+ * que describe esta misma seccion.
+ *
+ * Los contadores animan de 0 al valor al entrar en pantalla, pero el HTML ya
+ * trae el valor final: sin JS o con movimiento reducido se lee correcto. En
+ * el boceto el HTML decia "0" y sin JS se quedaba en cero.
+ *
+ * Prohibido agregar sellos, testimonios, logos de clientes o
+ * certificaciones: no existen en las fuentes (C-14).
+ */
+import { CATALOGO, CATEGORIAS } from '../data/catalogo';
+import { SETTINGS } from '../lib/settings';
+
+const anticipo = SETTINGS.depositPct.toLocaleString('es-MX', { maximumFractionDigits: 2 });
+
+const PASOS = [
+  { titulo: 'Cotiza por WhatsApp', texto: 'Comparte medidas y cantidad.' },
+  { titulo: 'Confirma y abona', texto: 'Envías tu comprobante; se valida el pago y el pedido pasa a producción.' },
+  { titulo: 'Recibe con saldo liquidado', texto: 'Se registra la fecha pactada y la entrega se autoriza solo con saldo $0.' },
+];
+
+const CIFRAS = [
+  { valor: CATEGORIAS.length, sufijo: '', etiqueta: 'Familias de producto' },
+  { valor: CATALOGO.length, sufijo: '', etiqueta: 'Productos en catálogo' },
+  { valor: SETTINGS.depositPct, sufijo: '%', etiqueta: 'Anticipo para producción' },
+  { valor: PASOS.length, sufijo: '', etiqueta: 'Pasos a producción' },
+];
+
+const mostrar = (n: number) => n.toLocaleString('es-MX', { maximumFractionDigits: 2 });
+---
+
+<section class="sec cifras-sec" data-testid="cifras">
+  <div class="wrap">
+    <div class="cifras">
+      {
+        CIFRAS.map((c) => (
+          <div class="cifra">
+            <div class="v">
+              <span data-contador={c.valor}>{mostrar(c.valor)}</span>
+              {c.sufijo && <em>{c.sufijo}</em>}
+            </div>
+            <div class="l">{c.etiqueta}</div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="proceso" data-testid="trust">
+  <div class="wrap">
+    <div class="sec-cab">
+      <p class="eyebrow">Cómo trabajamos</p>
+      <h2 class="titulo-seccion">Tres pasos <em>y a producción</em></h2>
+      <p class="lead">
+        Los pedidos personalizados requieren un anticipo del {anticipo}% para iniciar producción.
+        El saldo restante debe quedar liquidado antes de la entrega.
+      </p>
+    </div>
+    <ol class="pasos">
+      {
+        PASOS.map((p, i) => (
+          <li class="paso">
+            <span class="n">Paso {String(i + 1).padStart(2, '0')}</span>
+            <h3>{p.titulo}</h3>
+            <p>{p.texto}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .cifras-sec {
+    padding-top: 0;
+  }
+
+  .cifras-sec + .sec {
+    padding-top: 0;
+  }
+
+  .cifras {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 780px) {
+    .cifras {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .cifra {
+    border-top: 2px solid var(--border-brand);
+    padding-top: 13px;
+  }
+
+  .v {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.1rem);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-strong);
+  }
+
+  .v em {
+    font-style: normal;
+    color: var(--ink-brand);
+    font-size: 0.48em;
+  }
+
+  .l {
+    font-family: var(--font-mono);
+    font-size: 0.59375rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-top: 6px;
+  }
+
+  .pasos {
+    display: grid;
+    gap: clamp(16px, 2.6vw, 26px);
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 760px) {
+    .pasos {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .paso {
+    border-top: 2px solid var(--border-brand);
+    padding-top: 15px;
+  }
+
+  .n {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-brand);
+  }
+
+  .paso h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.05rem, 2vw, 1.3rem);
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--ink-strong);
+    margin: 9px 0 7px;
+  }
+
+  .paso p {
+    font-size: 0.94rem;
+    color: var(--ink-base);
+    margin: 0;
+  }
+</style>
+
+<script>
+  const contadores = Array.from(document.querySelectorAll<HTMLElement>('[data-contador]'));
+  const reduceMov = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (contadores.length && 'IntersectionObserver' in window && !reduceMov) {
+    const formato = (n: number, dec: number) =>
+      n.toLocaleString('es-MX', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+
+    /* Se ponen en cero ANTES de que se vean (estan muy abajo en la pagina),
+       asi la animacion no arranca con un salto del valor final a cero. */
+    contadores.forEach((el) => (el.textContent = '0'));
+
+    const io = new IntersectionObserver(
+      (entradas) => {
+        entradas.forEach((e) => {
+          if (!e.isIntersecting) return;
+          io.unobserve(e.target);
+          const el = e.target as HTMLElement;
+          const meta = Number(el.dataset.contador);
+          const dec = Number.isInteger(meta) ? 0 : 2;
+          const t0 = performance.now();
+          const paso = (t: number): void => {
+            const k = Math.min(1, (t - t0) / 900);
+            /* El ultimo cuadro usa el mismo formato que el HTML del build: un
+               anticipo de 33.5 debe terminar en 33,5 y no en 33,50. */
+            el.textContent =
+              k < 1
+                ? formato(meta * (1 - (1 - k) ** 3), dec)
+                : meta.toLocaleString('es-MX', { maximumFractionDigits: 2 });
+            if (k < 1) requestAnimationFrame(paso);
+          };
+          requestAnimationFrame(paso);
+        });
+      },
+      { threshold: 0.6 },
+    );
+    contadores.forEach((el) => io.observe(el));
+  }
+</script>
