@@ -19,7 +19,7 @@
  *                        la misma foto desenfocada que llena el area. Recortar
  *                        una de 2.9:1 a 1.2:1 perdia mas de la mitad y
  *                        agrandarla 2.5x la pixelaba.
- *   - Tira de miniaturas con los 7 trabajos: se puede elegir cualquiera. La
+ *   - Tira de miniaturas con los trabajos: se puede elegir cualquiera. La
  *     activa lleva una barra que se llena con el tiempo que le queda.
  *   - Anterior / pausa / siguiente de 44px (antes un icono de 14px) y
  *     contador. Flechas del teclado con el foco dentro del carrusel.
@@ -52,7 +52,6 @@ const PANORAMICA = 1.6;
 const ROTACION = [
   { palabra: 'lonas', pieza: 'lona-con-bastidor' },
   { palabra: 'viniles', pieza: 'vinil-para-cristales-y-ventanas' },
-  { palabra: 'letreros', pieza: 'letras-luminosas' },
   { palabra: 'menús', pieza: 'menus' },
   { palabra: 'playeras', pieza: 'serigrafia' },
   { palabra: 'calendarios', pieza: 'calendarios' },
@@ -76,7 +75,7 @@ const slides = await Promise.all(
 
 const primera = slides[0];
 const total = slides.length;
-const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendarios y stands.';
+const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
 ---
 
 <section class="portada" id="top" data-testid="portada">
