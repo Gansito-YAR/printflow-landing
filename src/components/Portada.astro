@@ -13,12 +13,9 @@
  *     borde derecho de la pantalla y de arriba abajo, sin marco ni esquinas.
  *   - Se desvanece hacia la izquierda: cerca del titulo la foto se funde con
  *     el negro de la pagina, que sigue siendo el fondo de las letras.
- *   - Cada foto se acomoda segun su forma (ver PANORAMICA):
- *       casi cuadradas → llenan el area (object-fit: cover; se recortan poco).
- *       panoramicas    → completas y sin agrandar, en la parte nitida, sobre
- *                        la misma foto desenfocada que llena el area. Recortar
- *                        una de 2.9:1 a 1.2:1 perdia mas de la mitad y
- *                        agrandarla 2.5x la pixelaba.
+ *   - Todas las fotos llenan el area (object-fit: cover) y se recortan. Las
+ *     panoramicas (menus, calendarios) pierden los lados y se agrandan; se
+ *     probo mostrarlas completas y el cliente prefirio que llenen el area.
  *   - Tira de miniaturas con los trabajos: se puede elegir cualquiera. La
  *     activa lleva una barra que se llena con el tiempo que le queda.
  *   - Anterior / pausa / siguiente de 44px (antes un icono de 14px) y
@@ -44,9 +41,6 @@ import { CATALOGO, CATEGORIAS } from '../data/catalogo';
 const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 const DESDE = '(min-width: 640px)';
 
-/* Proporcion (ancho / alto) a partir de la cual una foto ya no se recorta
-   para llenar el area (~1.2:1 en escritorio): se muestra completa. */
-const PANORAMICA = 1.6;
 
 /* Cada palabra apunta a una pieza real del catalogo 2026. */
 const ROTACION = [
@@ -63,13 +57,11 @@ const slides = await Promise.all(
     const item = CATALOGO.find((x) => x.id === pieza);
     if (!item) throw new Error(`Portada: no existe la pieza "${pieza}" en el catalogo.`);
     const familia = CATEGORIAS.find((c) => c.id === item.categoria)?.titulo ?? '';
-    const panoramica = item.width / item.height >= PANORAMICA;
-    const [foto, mini, fondo] = await Promise.all([
+    const [foto, mini] = await Promise.all([
       getImage({ src: item.image, widths: [640, 960, Math.min(item.width, 1280)], format: 'webp' }),
       getImage({ src: item.image, width: 160, format: 'webp' }),
-      panoramica ? getImage({ src: item.image, width: 320, format: 'webp' }) : null,
     ]);
-    return { palabra, item, familia, panoramica, foto: foto.srcSet.attribute, mini: mini.src, fondo: fondo?.src };
+    return { palabra, item, familia, foto: foto.srcSet.attribute, mini: mini.src };
   }),
 );
 
@@ -114,19 +106,13 @@ const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
         {
           slides.map((s, i) => (
             <figure
-              class:list={['slide', s.panoramica && 'slide-panoramica', i === 0 && 'is-on']}
+              class:list={['slide', i === 0 && 'is-on']}
               data-slide={i}
               data-palabra={s.palabra}
               aria-roledescription="diapositiva"
               aria-label={`${i + 1} de ${total}: ${s.item.titulo}`}
               aria-hidden={i === 0 ? undefined : 'true'}
             >
-              {s.fondo && (
-                <picture>
-                  <source media={DESDE} srcset={s.fondo} />
-                  <img src={PIXEL} alt="" aria-hidden="true" class="slide-fondo" decoding="async" />
-                </picture>
-              )}
               <picture>
                 <source
                   media={DESDE}
@@ -369,51 +355,6 @@ const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-
-  /* Panoramicas: la foto completa y nitida en la parte que no se desvanece,
-     arriba de la zona del nombre y los controles. Detras, ella misma
-     desenfocada llena el area: no se ven bordes ni franjas. */
-  .slide-fondo {
-    position: absolute;
-    inset: -8%;
-    width: 116%;
-    height: 116%;
-    object-fit: cover;
-    filter: blur(36px) brightness(0.5) saturate(1.15);
-  }
-
-  /* Un <img> posicionado no se estira entre left y right (toma su ancho
-     natural): el ancho y el alto van calculados. */
-  .slide-panoramica {
-    --pano-arriba: var(--space-8);
-    --pano-abajo: calc(var(--space-6) + 52px + var(--space-3) + 84px);
-    --pano-izq: 6%;
-  }
-
-  .slide-panoramica .slide-img {
-    z-index: 1;
-    top: var(--pano-arriba);
-    left: var(--pano-izq);
-    right: auto;
-    bottom: auto;
-    width: calc(100% - var(--pano-izq) - var(--gutter));
-    /* Mas alta que la foto (2:1 contra ~2.6:1): se ve mas grande y recorta
-       un poco los lados, a pedido del cliente. Nunca mas alta que el espacio
-       libre sobre el nombre y los controles. */
-    height: auto;
-    aspect-ratio: 2 / 1;
-    max-height: calc(100% - var(--pano-arriba) - var(--pano-abajo));
-    object-fit: cover;
-    object-position: center;
-  }
-
-  @media (min-width: 1000px) {
-    .slide-panoramica {
-      /* Entra en la zona que se desvanece: la panoramica crece y su orilla
-         izquierda se funde con el negro como el resto de la foto. */
-      --pano-izq: 12%;
-    }
   }
 
   /* Overlay: oscurece un poco toda la foto y bastante abajo, para que el
