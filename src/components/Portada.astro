@@ -398,17 +398,21 @@ const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
     right: auto;
     bottom: auto;
     width: calc(100% - var(--pano-izq) - var(--gutter));
-    height: calc(100% - var(--pano-arriba) - var(--pano-abajo));
-    object-fit: contain;
+    /* Mas alta que la foto (2:1 contra ~2.6:1): se ve mas grande y recorta
+       un poco los lados, a pedido del cliente. Nunca mas alta que el espacio
+       libre sobre el nombre y los controles. */
+    height: auto;
+    aspect-ratio: 2 / 1;
+    max-height: calc(100% - var(--pano-arriba) - var(--pano-abajo));
+    object-fit: cover;
     object-position: center;
   }
 
   @media (min-width: 1000px) {
     .slide-panoramica {
-      /* Entra un poco en la zona que se desvanece: asi la panoramica crece
-         (~610px a 1366) sin pasar de su tamano real, y su orilla izquierda
-         se funde con el negro como el resto de la foto. */
-      --pano-izq: 18%;
+      /* Entra en la zona que se desvanece: la panoramica crece y su orilla
+         izquierda se funde con el negro como el resto de la foto. */
+      --pano-izq: 12%;
     }
   }
 
