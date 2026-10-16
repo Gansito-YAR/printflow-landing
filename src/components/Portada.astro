@@ -7,36 +7,35 @@
  * foto de una lona al lado es la prueba de lo que dice el titulo. Un
  * carrusel independiente seria decoracion compitiendo con el titulo.
  *
- * Por que el carrusel existe: a partir de ~1000px la columna derecha quedaba
- * vacia (lo que se veia mal en laptop) y se pidio explicitamente un carrusel
- * en ese lugar.
+ * Carrusel ampliado (16/10/2026, pedido del cliente: "se ve muy pequeño"):
+ *   - El marco ocupa toda su columna (antes 46vh de ancho, ~356 x 445 px en
+ *     laptop) y crece al 58vh de alto: ~1.7x de area. A 768px de alto la
+ *     portada sigue entrando completa en la primera pantalla.
+ *   - Tira de miniaturas con los 7 trabajos: se puede elegir cualquiera. La
+ *     activa lleva una barra que se llena con el tiempo que le queda.
+ *   - Anterior / pausa / siguiente de 44px (antes un icono de 14px) y
+ *     contador. Flechas del teclado con el foco dentro del carrusel.
+ *   - Aparece desde 640px (tablet), debajo del titulo. En telefono sigue
+ *     oculto y sus imagenes no se descargan.
  *
  * Reglas que respeta:
- *   - Sin recorte. La foto entra completa (object-fit: contain) y detras va
- *     la misma imagen desenfocada para llenar el marco. Las proporciones van
- *     de 0.46 a 2.90; recortar era romper la regla del catalogo.
+ *   - Sin recorte en la foto principal: entra completa (object-fit: contain)
+ *     y detras va la misma imagen desenfocada para llenar el marco.
  *   - Sin JavaScript se lee completo: la primera palabra y la primera foto
- *     estan en el HTML. El script solo agrega el movimiento.
- *   - WCAG 2.2.2: todo lo que se mueve solo por mas de 5 segundos necesita
- *     pausa. Un boton detiene la palabra y el carrusel juntos. La palabra
- *     del boceto ya rotaba sin control; esto lo corrige.
- *   - prefers-reduced-motion: no rota nada.
- *   - En telefono el carrusel no se muestra y sus imagenes no se descargan
- *     (lazy dentro de un contenedor con display: none).
- *
- * Se retiro el isotipo grande que iba arriba del titulo, por pedido del
- * cliente. El logo sigue en el header.
+ *     estan en el HTML. Los controles nacen ocultos y el script los muestra.
+ *   - WCAG 2.2.2: todo lo que se mueve solo necesita pausa. El boton detiene
+ *     la palabra, el carrusel y la franja.
+ *   - prefers-reduced-motion: no rota nada; se navega solo a mano.
  */
 import { getImage } from 'astro:assets';
 import { CATALOGO, CATEGORIAS } from '../data/catalogo';
 
-/* El carrusel solo existe desde 1000px. Las fotos van en <picture> con una
-   fuente limitada a ese ancho: por debajo, el navegador usa el <img> de
-   respaldo, que es este pixel en linea, y NUNCA pide la foto. Se probo antes
-   con loading="lazy" dentro de un contenedor oculto y Chrome descargaba las
-   14 imagenes igual: ~200 KB por visita desde telefono para algo que no se ve. */
+/* Las fotos van en <picture> con una fuente limitada a este ancho: por debajo
+   el navegador usa el <img> de respaldo, que es este pixel en linea, y NUNCA
+   pide la foto. (loading="lazy" en un contenedor oculto no basta: Chrome
+   descargaba las imagenes igual.) */
 const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-const DESDE = '(min-width: 1000px)';
+const DESDE = '(min-width: 640px)';
 
 /* Cada palabra apunta a una pieza real del catalogo 2026. */
 const ROTACION = [
@@ -54,15 +53,17 @@ const slides = await Promise.all(
     const item = CATALOGO.find((x) => x.id === pieza);
     if (!item) throw new Error(`Portada: no existe la pieza "${pieza}" en el catalogo.`);
     const familia = CATEGORIAS.find((c) => c.id === item.categoria)?.titulo ?? '';
-    const [foto, fondo] = await Promise.all([
-      getImage({ src: item.image, widths: [480, 720, item.width], format: 'webp' }),
+    const [foto, fondo, mini] = await Promise.all([
+      getImage({ src: item.image, widths: [560, 800, Math.min(item.width, 1120)], format: 'webp' }),
       getImage({ src: item.image, width: 320, format: 'webp' }),
+      getImage({ src: item.image, width: 160, format: 'webp' }),
     ]);
-    return { palabra, item, familia, foto: foto.srcSet.attribute, fondo: fondo.src };
+    return { palabra, item, familia, foto: foto.srcSet.attribute, fondo: fondo.src, mini: mini.src };
   }),
 );
 
 const primera = slides[0];
+const total = slides.length;
 const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendarios y stands.';
 ---
 
@@ -90,7 +91,14 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
       </div>
     </div>
 
-    <div class="carrusel" data-carrusel aria-roledescription="carrusel" aria-label="Trabajos de la imprenta" role="region">
+    <div
+      class="carrusel"
+      data-carrusel
+      aria-roledescription="carrusel"
+      aria-label="Trabajos de la imprenta"
+      role="region"
+      data-testid="portada-carrusel"
+    >
       <div class="carrusel-marco">
         {
           slides.map((s, i) => (
@@ -99,7 +107,7 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
               data-slide={i}
               data-palabra={s.palabra}
               aria-roledescription="diapositiva"
-              aria-label={`${i + 1} de ${slides.length}: ${s.item.titulo}`}
+              aria-label={`${i + 1} de ${total}: ${s.item.titulo}`}
               aria-hidden={i === 0 ? undefined : 'true'}
             >
               <picture>
@@ -107,7 +115,11 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
                 <img src={PIXEL} alt="" aria-hidden="true" class="slide-fondo" decoding="async" />
               </picture>
               <picture>
-                <source media={DESDE} srcset={s.foto} sizes="(min-width: 1344px) 560px, 42vw" />
+                <source
+                  media={DESDE}
+                  srcset={s.foto}
+                  sizes="(min-width: 1344px) 640px, (min-width: 1000px) 46vw, 92vw"
+                />
                 <img
                   src={PIXEL}
                   alt={s.item.alt}
@@ -120,33 +132,69 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
                 />
               </picture>
               <figcaption class="slide-cap">
-                <b>{s.item.titulo}</b>
-                <span>{s.familia}</span>
+                <span class="slide-familia">{s.familia}</span>
+                <b class="slide-titulo">{s.item.titulo}</b>
               </figcaption>
             </figure>
           ))
         }
       </div>
 
-      <div class="carrusel-pie">
-        <ol class="marcas" aria-hidden="true">
-          {slides.map((_, i) => <li class:list={['marca-slide', i === 0 && 'is-on']} />)}
+      {/* Controles: nacen ocultos (sin JS no hay nada que mover) y el script
+          los muestra. Todos miden 44px o mas. */}
+      <div class="carrusel-pie" data-controles hidden>
+        <ol class="minis" aria-label="Elegir trabajo">
+          {
+            slides.map((s, i) => (
+              <li>
+                <button
+                  type="button"
+                  class:list={['mini', i === 0 && 'is-on']}
+                  data-ir={i}
+                  aria-label={`Ver ${s.item.titulo}`}
+                  aria-current={i === 0 ? 'true' : undefined}
+                  data-testid={`portada-mini-${i + 1}`}
+                >
+                  <picture>
+                    <source media={DESDE} srcset={s.mini} />
+                    <img src={PIXEL} alt="" aria-hidden="true" width="160" height="160" loading="lazy" decoding="async" />
+                  </picture>
+                  <span class="mini-avance" aria-hidden="true"></span>
+                </button>
+              </li>
+            ))
+          }
         </ol>
-        {/* Control de pausa (WCAG 2.2.2): un icono chico junto a las marcas,
-            como en cualquier carrusel. Antes era un boton con texto al lado del
-            CTA y el cliente lo pidio fuera de la portada. Detiene la palabra,
-            el carrusel y la franja. Nace oculto: sin JS no hay nada que pausar.
-            En telefono el carrusel no se muestra y no queda control visible;
-            ahi se respeta prefers-reduced-motion. */}
-        <button type="button" class="pausa" data-pausa aria-pressed="false" aria-label="Pausar animación" hidden>
-          <svg class="ico-pausa" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <rect x="6" y="5" width="4" height="14" rx="1"></rect>
-            <rect x="14" y="5" width="4" height="14" rx="1"></rect>
-          </svg>
-          <svg class="ico-play" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"></path>
-          </svg>
-        </button>
+
+        {/* La miniatura activa ya marca la posicion; el contador queda para
+            lectores de pantalla. */}
+        <p class="sr-only" aria-live="polite">Trabajo <span data-cuenta>1</span> de {total}</p>
+        <div class="mando">
+          <div class="mando-botones">
+            <button type="button" class="redondo" data-prev aria-label="Trabajo anterior" data-testid="portada-anterior">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+            </button>
+            <button
+              type="button"
+              class="redondo pausa"
+              data-pausa
+              aria-pressed="false"
+              aria-label="Pausar animación"
+              data-testid="portada-pausa"
+            >
+              <svg class="ico-pausa" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <rect x="6" y="5" width="4" height="14" rx="1"></rect>
+                <rect x="14" y="5" width="4" height="14" rx="1"></rect>
+              </svg>
+              <svg class="ico-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"></path>
+              </svg>
+            </button>
+            <button type="button" class="redondo" data-next aria-label="Trabajo siguiente" data-testid="portada-siguiente">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -157,11 +205,13 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
     padding-block: clamp(40px, 9vh, 96px) clamp(34px, 7vh, 76px);
     position: relative;
     overflow: hidden;
+    /* Tiempo de cada trabajo: lo leen la barra de avance y el script. */
+    --intervalo: 4.5s;
   }
 
   .portada-grid {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-6);
     align-items: center;
   }
 
@@ -184,7 +234,7 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
     display: block;
     color: var(--ink-brand);
     /* Lugar para la tilde de "menús": con el interlineado de 0.86 la Ú
-       chocaba con "IMPRIMIMOS". 1.11 (alto de la tilde) - 0.86 + aire. */
+       chocaba con "IMPRIMIMOS". */
     padding-top: 0.28em;
     min-height: 1em;
     white-space: nowrap;
@@ -212,46 +262,50 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
     gap: clamp(18px, 3vw, 30px);
   }
 
-  /* --- Carrusel: solo donde hay columna para el --- */
+  /* --- Carrusel --- */
   .carrusel {
     display: none;
   }
 
+  /* Tablet: debajo del titulo, a todo el ancho. */
+  @media (min-width: 640px) {
+    .carrusel {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .carrusel-marco {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  /* Escritorio: dos columnas iguales. El marco llena la suya. */
   @media (min-width: 1000px) {
     .portada-grid {
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: clamp(32px, 4vw, 64px);
     }
 
-    /* Con dos columnas el titulo se dimensiona por la columna, no por la
-       pantalla: "calendarios" a 11vw desbordaba la mitad izquierda. */
+    /* El titulo se dimensiona por su columna: "calendarios" no debe
+       desbordar la mitad izquierda. */
     .decir {
-      font-size: clamp(3rem, 6.4vw, 7.5rem);
+      font-size: clamp(3rem, 5.6vw, 7.5rem);
     }
 
-    /* Pegado al borde derecho del contenido: el marco suele quedar mas
-       angosto que su columna, y alineado a la izquierda dejaba 144px de
-       margen derecho contra 52 del izquierdo (medido a 1366px). */
-    .carrusel {
-      display: grid;
-      gap: var(--space-2);
-      justify-items: end;
+    .carrusel-marco {
+      aspect-ratio: auto;
+      height: clamp(400px, 58vh, 680px);
     }
   }
 
   .carrusel-marco {
     position: relative;
-    aspect-ratio: 4 / 5;
-    /* Ancho explicito: los hijos son absolutos y no le dan tamano, asi que
-       alineado a la derecha sin ancho colapsaba a 2px. 46.4vh = 58vh de alto
-       por la proporcion 4:5. Con 58vh, en una laptop de 768px de alto la
-       portada entera (aviso, header, titulo y carrusel) entra en la primera
-       pantalla; con el 70vh original no entraba. */
-    width: min(100%, 46.4vh);
+    width: 100%;
     border-radius: var(--radius-xl);
     overflow: hidden;
     background: var(--surface-1);
     border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-lg);
   }
 
   .slide {
@@ -261,8 +315,7 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
     display: grid;
     place-items: center;
     opacity: 0;
-    /* Mismo tiempo que la palabra (0.5s): si la foto tarda mas, por un
-       instante el titulo y la imagen no coinciden. */
+    /* Mismo tiempo que la palabra (0.5s): titulo e imagen cambian juntos. */
     transition: opacity 0.5s var(--ease-out);
   }
 
@@ -270,8 +323,6 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
     opacity: 1;
   }
 
-  /* <picture> no debe crear caja propia: la imagen se dimensiona contra la
-     diapositiva, no contra un contenedor inline sin alto. */
   .slide picture {
     display: contents;
   }
@@ -284,7 +335,7 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
     width: 116%;
     height: 116%;
     object-fit: cover;
-    filter: blur(28px) brightness(0.45) saturate(1.1);
+    filter: blur(32px) brightness(0.4) saturate(1.15);
   }
 
   .slide-img {
@@ -292,91 +343,154 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: var(--space-3) var(--space-3) var(--space-8);
+    padding: var(--space-4) var(--space-4) var(--space-10);
   }
 
   .slide-cap {
     position: absolute;
     inset-inline: 0;
     bottom: 0;
-    padding: var(--space-5) var(--space-3) var(--space-2);
-    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--surface-0) 92%, transparent) 55%);
+    padding: var(--space-8) var(--space-5) var(--space-4);
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--surface-0) 94%, transparent) 50%);
     display: grid;
-    gap: 2px;
+    gap: var(--space-1);
   }
 
-  .slide-cap b {
+  .slide-familia {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    color: var(--ink-brand);
+  }
+
+  .slide-titulo {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: 1.05rem;
+    font-size: clamp(1.5rem, 2.2vw, 2.25rem);
+    line-height: 1;
     text-transform: uppercase;
     color: var(--ink-strong);
   }
 
-  .slide-cap span {
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-brand);
-  }
-
-  /* Mismo ancho que el marco, para que el icono quede alineado a su borde. */
+  /* --- Controles --- */
+  /* Miniaturas a la izquierda y botones a la derecha en una sola fila; si la
+     columna es angosta, los botones bajan. */
   .carrusel-pie {
-    width: min(100%, 46.4vh);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-2);
+    gap: var(--space-3);
   }
 
-  .marcas {
+  .carrusel-pie[hidden] {
+    display: none;
+  }
+
+  .minis {
     display: flex;
-    gap: 6px;
+    gap: var(--space-1);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .marca-slide {
-    width: 18px;
-    height: 3px;
-    border-radius: var(--radius-pill);
-    background: var(--border-hairline);
+  .mini {
+    position: relative;
+    display: block;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 2px solid var(--border-subtle);
+    background: var(--surface-2);
+    cursor: pointer;
+    opacity: 0.55;
     transition:
-      background-color var(--duration-base) ease,
-      width var(--duration-base) ease;
+      opacity var(--duration-fast) ease,
+      border-color var(--duration-fast) ease;
   }
 
-  .marca-slide.is-on {
-    width: 32px;
+  .mini picture {
+    display: contents;
+  }
+
+  .mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mini:hover,
+  .mini:focus-visible {
+    opacity: 0.9;
+  }
+
+  .mini.is-on {
+    opacity: 1;
+    border-color: var(--border-brand);
+  }
+
+  /* Barra de avance: se llena en lo que dura el trabajo activo. Comunica
+     cuando cambia; no es decoracion. */
+  .mini-avance {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 4px;
     background: var(--ink-brand);
+    transform: scaleX(0);
+    transform-origin: left;
   }
 
-  /* Icono discreto: 32px, por encima de los 24 que pide WCAG 2.2 AA. */
-  .pausa {
-    width: 32px;
-    height: 32px;
-    flex: 0 0 auto;
+  .carrusel[data-corre='true'] .mini.is-on .mini-avance {
+    animation: avance var(--intervalo) linear both;
+  }
+
+  @keyframes avance {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .mando-botones {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .redondo {
+    width: 44px;
+    height: 44px;
     display: grid;
     place-items: center;
-    color: var(--ink-muted);
+    color: var(--ink-strong);
     background: transparent;
-    border: 1px solid var(--border-hairline);
+    border: 1px solid var(--border-control);
     border-radius: 50%;
     cursor: pointer;
     transition:
       color var(--duration-fast) ease,
-      border-color var(--duration-fast) ease;
+      border-color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease;
   }
 
-  .pausa:hover {
-    color: var(--ink-strong);
-    border-color: var(--border-control);
+  .redondo:hover {
+    border-color: var(--border-brand);
+    color: var(--ink-brand);
+  }
+
+  .redondo svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   .pausa svg {
     fill: currentColor;
+    stroke: none;
   }
 
   .pausa .ico-play,
@@ -387,89 +501,143 @@ const lectura = 'lonas, viniles, letreros luminosos, menús, playeras, calendari
   .pausa[aria-pressed='true'] .ico-play {
     display: block;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide {
+      transition: none;
+    }
+
+    .rota :global(span) {
+      animation: none;
+    }
+  }
 </style>
 
 <script>
-  const INTERVALO_MS = 2800;
-
+  const portada = document.querySelector<HTMLElement>('[data-testid="portada"]');
   const caja = document.querySelector<HTMLElement>('[data-rota]');
   const carrusel = document.querySelector<HTMLElement>('[data-carrusel]');
+  const controles = document.querySelector<HTMLElement>('[data-controles]');
   const slides = Array.from(document.querySelectorAll<HTMLElement>('[data-slide]'));
-  const marcas = Array.from(document.querySelectorAll<HTMLElement>('.marca-slide'));
+  const minis = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-ir]'));
+  const cuenta = document.querySelector<HTMLElement>('[data-cuenta]');
   const pausa = document.querySelector<HTMLButtonElement>('[data-pausa]');
+  const prev = document.querySelector<HTMLButtonElement>('[data-prev]');
+  const next = document.querySelector<HTMLButtonElement>('[data-next]');
   const reduceMov = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (caja && slides.length > 1 && !reduceMov) {
+  /* El tiempo vive en CSS (--intervalo) para que la barra y el cambio coincidan. */
+  const leerIntervalo = (): number => {
+    const v = portada ? getComputedStyle(portada).getPropertyValue('--intervalo').trim() : '';
+    const n = Number.parseFloat(v);
+    return Number.isFinite(n) && n > 0 ? n * (v.endsWith('ms') ? 1 : 1000) : 4500;
+  };
+
+  if (caja && carrusel && slides.length > 1) {
+    const INTERVALO_MS = leerIntervalo();
     let i = 0;
     let timer: number | undefined;
-    let pausadoPorUsuario = false;
+    let pausadoPorUsuario = reduceMov; // con movimiento reducido nada rota solo
     let encima = false; // mouse o foco de teclado sobre el carrusel
     let visible = true;
 
+    if (controles) controles.hidden = false;
+
+    const marcarCorre = (): void => carrusel.setAttribute('data-corre', String(timer !== undefined));
+
     const mostrar = (n: number): void => {
-      i = n;
-      const palabra = slides[i].dataset.palabra ?? '';
+      i = (n + slides.length) % slides.length;
       const span = document.createElement('span');
-      span.textContent = palabra;
+      span.textContent = slides[i].dataset.palabra ?? '';
       caja.replaceChildren(span);
       slides.forEach((s, k) => {
         s.classList.toggle('is-on', k === i);
         if (k === i) s.removeAttribute('aria-hidden');
         else s.setAttribute('aria-hidden', 'true');
       });
-      marcas.forEach((m, k) => m.classList.toggle('is-on', k === i));
-    };
-
-    const arrancar = (): void => {
-      if (timer !== undefined || pausadoPorUsuario || encima || !visible || document.hidden) return;
-      timer = window.setInterval(() => mostrar((i + 1) % slides.length), INTERVALO_MS);
+      minis.forEach((m, k) => {
+        m.classList.toggle('is-on', k === i);
+        if (k === i) m.setAttribute('aria-current', 'true');
+        else m.removeAttribute('aria-current');
+      });
+      if (cuenta) cuenta.textContent = String(i + 1);
     };
 
     const detener = (): void => {
       if (timer !== undefined) window.clearInterval(timer);
       timer = undefined;
+      marcarCorre();
     };
 
+    const arrancar = (): void => {
+      if (timer !== undefined || pausadoPorUsuario || encima || !visible || document.hidden) return;
+      timer = window.setInterval(() => mostrar(i + 1), INTERVALO_MS);
+      marcarCorre();
+    };
+
+    /* Navegar a mano reinicia el reloj (y la barra) del trabajo elegido. */
+    const ir = (n: number): void => {
+      mostrar(n);
+      if (timer !== undefined) {
+        detener();
+        arrancar();
+      }
+    };
+
+    minis.forEach((m) => m.addEventListener('click', () => ir(Number(m.dataset.ir))));
+    prev?.addEventListener('click', () => ir(i - 1));
+    next?.addEventListener('click', () => ir(i + 1));
+
+    carrusel.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        ir(i - 1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        ir(i + 1);
+      }
+    });
+
     if (pausa) {
-      pausa.hidden = false;
-      /* La franja solo se anima cuando existe este control: sin JS, o sin el
-         boton, se queda quieta en vez de moverse sin forma de pararla. */
-      document.documentElement.classList.add('anim-ok');
-      pausa.addEventListener('click', () => {
-        pausadoPorUsuario = !pausadoPorUsuario;
-        pausa.setAttribute('aria-pressed', String(pausadoPorUsuario));
-        pausa.setAttribute('aria-label', pausadoPorUsuario ? 'Reanudar animación' : 'Pausar animación');
-        /* La franja de palabras escucha esta clase para detenerse tambien. */
-        document.documentElement.classList.toggle('anim-pausada', pausadoPorUsuario);
-        if (pausadoPorUsuario) detener();
-        else arrancar();
-      });
+      if (reduceMov) {
+        // Sin rotacion automatica el boton de pausa no tiene nada que pausar.
+        pausa.hidden = true;
+      } else {
+        /* La franja solo se anima cuando existe este control. */
+        document.documentElement.classList.add('anim-ok');
+        pausa.addEventListener('click', () => {
+          pausadoPorUsuario = !pausadoPorUsuario;
+          pausa.setAttribute('aria-pressed', String(pausadoPorUsuario));
+          pausa.setAttribute('aria-label', pausadoPorUsuario ? 'Reanudar animación' : 'Pausar animación');
+          /* La franja de palabras escucha esta clase para detenerse tambien. */
+          document.documentElement.classList.toggle('anim-pausada', pausadoPorUsuario);
+          if (pausadoPorUsuario) detener();
+          else arrancar();
+        });
+      }
     }
 
     /* Pausa mientras el mouse o el foco de teclado estan sobre el carrusel:
        quien se detiene a mirar una foto no quiere que se le cambie. */
-    if (carrusel) {
-      const entrar = (): void => {
-        encima = true;
-        detener();
-      };
-      const salir = (): void => {
-        encima = false;
-        arrancar();
-      };
-      carrusel.addEventListener('mouseenter', entrar);
-      carrusel.addEventListener('mouseleave', salir);
-      carrusel.addEventListener('focusin', entrar);
-      carrusel.addEventListener('focusout', (e) => {
-        if (!carrusel.contains(e.relatedTarget as Node | null)) salir();
-      });
-    }
+    const entrar = (): void => {
+      encima = true;
+      detener();
+    };
+    const salir = (): void => {
+      encima = false;
+      arrancar();
+    };
+    carrusel.addEventListener('mouseenter', entrar);
+    carrusel.addEventListener('mouseleave', salir);
+    carrusel.addEventListener('focusin', entrar);
+    carrusel.addEventListener('focusout', (e) => {
+      if (!carrusel.contains(e.relatedTarget as Node | null)) salir();
+    });
 
-    /* No gasta bateria rotando lo que nadie ve: se detiene con la pestana
-       oculta y cuando la portada sale de pantalla. */
+    /* No gasta bateria rotando lo que nadie ve. */
     document.addEventListener('visibilitychange', () => (document.hidden ? detener() : arrancar()));
 
-    if ('IntersectionObserver' in window && carrusel) {
+    if ('IntersectionObserver' in window) {
       new IntersectionObserver(([e]) => {
         visible = e.isIntersecting;
         if (visible) arrancar();
