@@ -405,7 +405,10 @@ const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
 
   @media (min-width: 1000px) {
     .slide-panoramica {
-      --pano-izq: 34%;
+      /* Entra un poco en la zona que se desvanece: asi la panoramica crece
+         (~610px a 1366) sin pasar de su tamano real, y su orilla izquierda
+         se funde con el negro como el resto de la foto. */
+      --pano-izq: 18%;
     }
   }
 
