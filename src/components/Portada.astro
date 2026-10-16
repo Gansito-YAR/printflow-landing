@@ -45,11 +45,11 @@ const DESDE = '(min-width: 640px)';
 /* Cada palabra apunta a una pieza real del catalogo 2026. */
 const ROTACION = [
   { palabra: 'lonas', pieza: 'lona-con-bastidor' },
-  { palabra: 'viniles', pieza: 'vinil-para-cristales-y-ventanas' },
+  { palabra: 'calcomanías', pieza: 'vinil-para-cristales-y-ventanas' },
   { palabra: 'menús', pieza: 'menus' },
   { palabra: 'playeras', pieza: 'serigrafia' },
   { palabra: 'calendarios', pieza: 'calendarios' },
-  { palabra: 'stands', pieza: 'stands-y-banderines' },
+  { palabra: 'banderines', pieza: 'stands-y-banderines' },
 ] as const;
 
 const slides = await Promise.all(
@@ -67,7 +67,7 @@ const slides = await Promise.all(
 
 const primera = slides[0];
 const total = slides.length;
-const lectura = 'lonas, viniles, menús, playeras, calendarios y stands.';
+const lectura = 'lonas, calcomanías, menús, playeras, calendarios y banderines.';
 ---
 
 <section class="portada" id="top" data-testid="portada">
